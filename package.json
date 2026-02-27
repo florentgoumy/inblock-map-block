@@ -1,0 +1,15 @@
+{
+  "name": "inblock-map-block",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gutenberg block to display an OpenStreetMap and plot items from a selected post type.",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "lint:js": "wp-scripts lint-js"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^30.12.0"
+  }
+}
