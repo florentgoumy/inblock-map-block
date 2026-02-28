@@ -10,6 +10,10 @@
     "lint:js": "wp-scripts lint-js"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.21",
     "@wordpress/scripts": "^30.12.0"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
   }
 }

@@ -1,0 +1,7 @@
+.inblock-map-block__map {
+  width: 100%;
+  min-height: 320px;
+}
+
+/* Leaflet base styles (when bundled via npm) */
+@import "leaflet/dist/leaflet.css";
