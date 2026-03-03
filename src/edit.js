@@ -6,6 +6,7 @@ import {
 	SelectControl,
 	TextControl,
 	ToggleControl,
+	Notice,
 } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
@@ -34,14 +35,7 @@ async function fetchPostTypes() {
 	}
 
 	return Object.values( data )
-		.filter(
-			( t ) =>
-				t &&
-				( t.viewable ||
-					t.rest_base ||
-					t.slug === 'post' ||
-					t.slug === 'page' )
-		)
+		.filter( ( t ) => t && ( t.visibility?.show_ui || t.slug === 'post' ) )
 		.map( ( t ) => ( {
 			label: t.name || t.slug,
 			value: t.slug,
@@ -156,6 +150,11 @@ export default function Edit( { attributes, setAttributes } ) {
 		setTimeout( () => mapRef.current.invalidateSize(), 0 );
 	}, [ height ] );
 
+	const markerSourceHelp =
+		'ACF Location: ACF field returning an object with lat/lng (ex: ACF Pro Google Map).\n' +
+		'ACF text {lat,lng}: ACF text field containing "{45.78,4.99}" or "45.78,4.99".\n' +
+		'Post meta: lat/lng stored in post meta keys (ex: inblock_lat/inblock_lng).';
+
 	return (
 		<>
 			<InspectorControls>
@@ -238,6 +237,10 @@ export default function Edit( { attributes, setAttributes } ) {
 								}
 							/>
 
+							<Notice status="info" isDismissible={ false }>
+								{ markerSourceHelp }
+							</Notice>
+
 							<SelectControl
 								label={ __(
 									'Markers source',
@@ -250,6 +253,10 @@ export default function Edit( { attributes, setAttributes } ) {
 										value: 'acf_location',
 									},
 									{
+										label: 'ACF text {lat,lng}',
+										value: 'acf_text_latlng',
+									},
+									{
 										label: 'Post meta (lat/lng)',
 										value: 'meta_latlng',
 									},
@@ -259,15 +266,14 @@ export default function Edit( { attributes, setAttributes } ) {
 								}
 							/>
 
-							{ markersSource === 'acf_location' && (
+							{ ( markersSource === 'acf_location' ||
+								markersSource === 'acf_text_latlng' ) && (
 								<TextControl
 									label={ __(
 										'ACF field name',
 										'inblock-map-block'
 									) }
-									helperText={
-										'Example: location (expects {lat, lng})'
-									}
+									helperText={ 'Example: location' }
 									value={ acfLocationField }
 									onChange={ ( value ) =>
 										setAttributes( {

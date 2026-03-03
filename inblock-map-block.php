@@ -123,7 +123,18 @@ function inblock_map_block_render( $attributes ) {
 						$point_lat = (float) $loc['lat'];
 						$point_lng = (float) $loc['lng'];
 					}
-				} elseif ( 'meta_latlng' === $markers_source ) {
+				} elseif ( 'acf_text_latlng' === $markers_source && function_exists( 'get_field' ) ) {
+					$raw = get_field( $acf_field, $post_id );
+					if ( is_string( $raw ) ) {
+						$raw = trim( $raw );
+						$raw = trim( $raw, "{}()[]" );
+						$parts = array_map( 'trim', explode( ',', $raw ) );
+						if ( count( $parts ) >= 2 ) {
+							$point_lat = (float) $parts[0];
+							$point_lng = (float) $parts[1];
+						}
+					}
+} elseif ( 'meta_latlng' === $markers_source ) {
 					$meta_lat = get_post_meta( $post_id, $lat_meta_key, true );
 					$meta_lng = get_post_meta( $post_id, $lng_meta_key, true );
 					if ( '' !== $meta_lat && '' !== $meta_lng ) {
