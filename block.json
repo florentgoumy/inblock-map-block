@@ -5,7 +5,7 @@
   "title": "Inblock Map Block",
   "category": "widgets",
   "icon": "location",
-  "description": "Display an OpenStreetMap map and plot items from a selected post type.",
+  "description": "Display an OpenStreetMap map.",
   "textdomain": "inblock-map-block",
   "supports": {
     "html": false
