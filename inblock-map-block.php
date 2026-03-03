@@ -40,11 +40,17 @@ function inblock_map_block_register_block() {
 		$asset['version']
 	);
 
+	$view_asset_file = plugin_dir_path( __FILE__ ) . 'build/view.asset.php';
+	$view_asset = file_exists( $view_asset_file ) ? require $view_asset_file : array(
+		'dependencies' => array(),
+		'version'      => $asset['version'],
+	);
+
 	wp_register_script(
 		'inblock-map-block-view',
 		plugins_url( 'build/view.js', __FILE__ ),
-		array(),
-		$asset['version'],
+		isset( $view_asset['dependencies'] ) ? $view_asset['dependencies'] : array(),
+		isset( $view_asset['version'] ) ? $view_asset['version'] : $asset['version'],
 		true
 	);
 
