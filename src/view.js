@@ -18,6 +18,15 @@ function safeJsonParse( text ) {
 	}
 }
 
+function escapeHtml( str ) {
+	return String( str )
+		.replaceAll( '&', '&amp;' )
+		.replaceAll( '<', '&lt;' )
+		.replaceAll( '>', '&gt;' )
+		.replaceAll( '"', '&quot;' )
+		.replaceAll( "'", '&#039;' );
+}
+
 function initMap( el ) {
 	const lat = Number.parseFloat( el.dataset.lat || '0' );
 	const lng = Number.parseFloat( el.dataset.lng || '0' );
@@ -34,6 +43,8 @@ function initMap( el ) {
 
 	const markersPopup = el.dataset.markersPopup === '1';
 	const markersAutoFit = el.dataset.markersAutoFit === '1';
+	const markerStyle = el.dataset.markerStyle || 'default';
+	const markerColor = el.dataset.markerColor || '#2563eb';
 
 	const map = L.map( el, {
 		zoomControl: true,
@@ -72,17 +83,30 @@ function initMap( el ) {
 			return;
 		}
 
-		const marker = L.marker( [ m.lat, m.lng ], { draggable: false } ).addTo(
-			map
-		);
+		let leafletMarker;
+		if ( markerStyle === 'circle' ) {
+			leafletMarker = L.circleMarker( [ m.lat, m.lng ], {
+				radius: 8,
+				color: markerColor,
+				fillColor: markerColor,
+				fillOpacity: 0.9,
+				weight: 2,
+			} ).addTo( map );
+		} else {
+			leafletMarker = L.marker( [ m.lat, m.lng ], {
+				draggable: false,
+			} ).addTo( map );
+		}
 
 		bounds.push( [ m.lat, m.lng ] );
 
 		if ( markersPopup && m.title ) {
-			const title = m.url
-				? `<a href=\"${ m.url }\">${ m.title }</a>`
-				: m.title;
-			marker.bindPopup( title );
+			const safeTitle = escapeHtml( m.title );
+			const safeUrl = m.url ? escapeHtml( m.url ) : null;
+			const html = safeUrl
+				? `<a href="${ safeUrl }">${ safeTitle }</a>`
+				: safeTitle;
+			leafletMarker.bindPopup( html );
 		}
 	} );
 

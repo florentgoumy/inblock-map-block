@@ -70,6 +70,8 @@ export default function Edit( { attributes, setAttributes } ) {
 		markersLimit,
 		markersPopup,
 		markersAutoFit,
+		markerStyle,
+		markerColor,
 	} = attributes;
 
 	const [ postTypeOptions, setPostTypeOptions ] = useState( [] );
@@ -363,6 +365,38 @@ export default function Edit( { attributes, setAttributes } ) {
 									} )
 								}
 							/>
+
+							<SelectControl
+								label={ __(
+									'Marker style',
+									'inblock-map-block'
+								) }
+								value={ markerStyle }
+								options={ [
+									{ label: 'Default', value: 'default' },
+									{ label: 'Circle', value: 'circle' },
+								] }
+								onChange={ ( value ) =>
+									setAttributes( { markerStyle: value } )
+								}
+							/>
+
+							{ markerStyle === 'circle' && (
+								<TextControl
+									label={ __(
+										'Marker color',
+										'inblock-map-block'
+									) }
+									helperText={ __(
+										'Hex color, e.g. #2563eb',
+										'inblock-map-block'
+									) }
+									value={ markerColor }
+									onChange={ ( value ) =>
+										setAttributes( { markerColor: value } )
+									}
+								/>
+							) }
 						</>
 					) }
 				</PanelBody>

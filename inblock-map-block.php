@@ -90,6 +90,8 @@ function inblock_map_block_render( $attributes ) {
 	$markers_limit    = isset( $attributes['markersLimit'] ) ? (int) $attributes['markersLimit'] : 100;
 	$markers_popup    = isset( $attributes['markersPopup'] ) ? (bool) $attributes['markersPopup'] : true;
 	$markers_autofit  = isset( $attributes['markersAutoFit'] ) ? (bool) $attributes['markersAutoFit'] : true;
+	$marker_style     = isset( $attributes['markerStyle'] ) ? (string) $attributes['markerStyle'] : 'default';
+	$marker_color     = isset( $attributes['markerColor'] ) ? (string) $attributes['markerColor'] : '#2563eb';
 
 	// Basic clamping (safety).
 	$lat  = max( -90.0, min( 90.0, $lat ) );
@@ -130,10 +132,19 @@ function inblock_map_block_render( $attributes ) {
 					if ( is_string( $raw ) ) {
 						$raw = trim( $raw );
 						$raw = trim( $raw, "{}()[]" );
+						// Expected: "lat,lng" (with dot decimals). Example: 45.7885, 4.9980
 						$parts = array_map( 'trim', explode( ',', $raw ) );
 						if ( count( $parts ) >= 2 ) {
-							$point_lat = (float) $parts[0];
-							$point_lng = (float) $parts[1];
+							$a = (float) $parts[0];
+							$b = (float) $parts[1];
+							// Auto-swap if it looks like lng,lat.
+							if ( abs( $a ) > 90 && abs( $b ) <= 90 ) {
+								$point_lat = $b;
+								$point_lng = $a;
+							} else {
+								$point_lat = $a;
+								$point_lng = $b;
+							}
 						}
 					}
 } elseif ( 'meta_latlng' === $markers_source ) {
@@ -166,13 +177,15 @@ function inblock_map_block_render( $attributes ) {
 	}
 
 	$attrs = sprintf(
-		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d" data-markers-popup="%d" data-markers-auto-fit="%d"',
+		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d" data-markers-popup="%d" data-markers-auto-fit="%d" data-marker-style="%s" data-marker-color="%s",
 		esc_attr( $lat ),
 		esc_attr( $lng ),
 		$zoom,
 		$height,
 		$markers_popup ? 1 : 0,
-		$markers_autofit ? 1 : 0
+		$markers_autofit ? 1 : 0,
+		esc_attr( $marker_style ),
+		esc_attr( $marker_color )
 	);
 
 	$markers_json = wp_json_encode( $markers );
