@@ -1,5 +1,13 @@
 import L from 'leaflet';
 
+function safeJsonParse( text ) {
+	try {
+		return JSON.parse( text );
+	} catch ( e ) {
+		return null;
+	}
+}
+
 function initMap( el ) {
 	const lat = Number.parseFloat( el.dataset.lat || '0' );
 	const lng = Number.parseFloat( el.dataset.lng || '0' );
@@ -14,6 +22,9 @@ function initMap( el ) {
 		el.style.height = height + 'px';
 	}
 
+	const markersPopup = el.dataset.markersPopup === '1';
+	const markersAutoFit = el.dataset.markersAutoFit === '1';
+
 	const map = L.map( el, {
 		zoomControl: true,
 		attributionControl: true,
@@ -24,7 +35,50 @@ function initMap( el ) {
 		attribution: '&copy; OpenStreetMap contributors',
 	} ).addTo( map );
 
-	L.marker( [ lat, lng ], { draggable: false } ).addTo( map );
+	const markers = [
+		{
+			lat,
+			lng,
+			title: null,
+			url: null,
+		},
+	];
+
+	const markersScript = el
+		.closest( '.wp-block-inblock-map-block' )
+		?.querySelector( '.inblock-map-block__markers' );
+
+	if ( markersScript?.textContent ) {
+		const parsed = safeJsonParse( markersScript.textContent );
+		if ( Array.isArray( parsed ) && parsed.length ) {
+			markers.splice( 0, markers.length, ...parsed );
+		}
+	}
+
+	const bounds = [];
+
+	markers.forEach( ( m ) => {
+		if ( typeof m?.lat !== 'number' || typeof m?.lng !== 'number' ) {
+			return;
+		}
+
+		const marker = L.marker( [ m.lat, m.lng ], { draggable: false } ).addTo(
+			map
+		);
+
+		bounds.push( [ m.lat, m.lng ] );
+
+		if ( markersPopup && m.title ) {
+			const title = m.url
+				? `<a href="${ m.url }">${ m.title }</a>`
+				: m.title;
+			marker.bindPopup( title );
+		}
+	} );
+
+	if ( markersAutoFit && bounds.length > 1 ) {
+		map.fitBounds( bounds, { padding: [ 20, 20 ] } );
+	}
 }
 
 window.addEventListener( 'DOMContentLoaded', () => {

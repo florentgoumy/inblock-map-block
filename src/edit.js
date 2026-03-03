@@ -1,14 +1,67 @@
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody, RangeControl } from '@wordpress/components';
-import { useEffect, useRef } from '@wordpress/element';
+import {
+	PanelBody,
+	RangeControl,
+	SelectControl,
+	TextControl,
+	ToggleControl,
+} from '@wordpress/components';
+import { useEffect, useRef, useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 import L from 'leaflet';
 
+async function fetchPostTypes() {
+	const data = await apiFetch( { path: '/wp/v2/types?context=edit' } );
+	if ( ! data ) {
+		return [];
+	}
+
+	return Object.values( data )
+		.filter( ( t ) => t?.visibility?.public )
+		.map( ( t ) => ( {
+			label: t.name,
+			value: t.slug,
+		} ) );
+}
+
 export default function Edit( { attributes, setAttributes } ) {
-	const { lat, lng, zoom, height } = attributes;
+	const {
+		lat,
+		lng,
+		zoom,
+		height,
+		markersEnabled,
+		markersPostType,
+		markersSource,
+		acfLocationField,
+		latMetaKey,
+		lngMetaKey,
+		markersLimit,
+		markersPopup,
+		markersAutoFit,
+	} = attributes;
+
+	const [ postTypeOptions, setPostTypeOptions ] = useState( [] );
+
 	const mapElRef = useRef( null );
 	const mapRef = useRef( null );
 	const markerRef = useRef( null );
+
+	useEffect( () => {
+		let cancelled = false;
+		fetchPostTypes()
+			.then( ( types ) => {
+				if ( cancelled ) {
+					return;
+				}
+				setPostTypeOptions( types );
+			} )
+			.catch( () => {} );
+		return () => {
+			cancelled = true;
+		};
+	}, [] );
 
 	useEffect( () => {
 		if ( ! mapElRef.current || mapRef.current ) {
@@ -131,6 +184,139 @@ export default function Edit( { attributes, setAttributes } ) {
 						max={ 900 }
 						step={ 10 }
 					/>
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Markers', 'inblock-map-block' ) }
+					initialOpen={ false }
+				>
+					<ToggleControl
+						label={ __( 'Enable markers', 'inblock-map-block' ) }
+						checked={ !! markersEnabled }
+						onChange={ ( enabled ) =>
+							setAttributes( { markersEnabled: !! enabled } )
+						}
+					/>
+
+					{ markersEnabled && (
+						<>
+							<SelectControl
+								label={ __( 'Post type', 'inblock-map-block' ) }
+								value={ markersPostType }
+								options={ [
+									{ label: '—', value: '' },
+									...postTypeOptions,
+								] }
+								onChange={ ( value ) =>
+									setAttributes( {
+										markersPostType: value,
+									} )
+								}
+							/>
+
+							<SelectControl
+								label={ __(
+									'Markers source',
+									'inblock-map-block'
+								) }
+								value={ markersSource }
+								options={ [
+									{
+										label: 'ACF Location field',
+										value: 'acf_location',
+									},
+									{
+										label: 'Post meta (lat/lng)',
+										value: 'meta_latlng',
+									},
+								] }
+								onChange={ ( value ) =>
+									setAttributes( { markersSource: value } )
+								}
+							/>
+
+							{ markersSource === 'acf_location' && (
+								<TextControl
+									label={ __(
+										'ACF field name',
+										'inblock-map-block'
+									) }
+									helperText={
+										'Example: location (expects {lat, lng})'
+									}
+									value={ acfLocationField }
+									onChange={ ( value ) =>
+										setAttributes( {
+											acfLocationField: value,
+										} )
+									}
+								/>
+							) }
+
+							{ markersSource === 'meta_latlng' && (
+								<>
+									<TextControl
+										label={ __(
+											'Latitude meta key',
+											'inblock-map-block'
+										) }
+										value={ latMetaKey }
+										onChange={ ( value ) =>
+											setAttributes( {
+												latMetaKey: value,
+											} )
+										}
+									/>
+									<TextControl
+										label={ __(
+											'Longitude meta key',
+											'inblock-map-block'
+										) }
+										value={ lngMetaKey }
+										onChange={ ( value ) =>
+											setAttributes( {
+												lngMetaKey: value,
+											} )
+										}
+									/>
+								</>
+							) }
+
+							<RangeControl
+								label={ __( 'Limit', 'inblock-map-block' ) }
+								value={ markersLimit }
+								onChange={ ( value ) =>
+									setAttributes( { markersLimit: value } )
+								}
+								min={ 1 }
+								max={ 500 }
+							/>
+
+							<ToggleControl
+								label={ __(
+									'Popup (title + link)',
+									'inblock-map-block'
+								) }
+								checked={ !! markersPopup }
+								onChange={ ( value ) =>
+									setAttributes( { markersPopup: !! value } )
+								}
+							/>
+
+							<ToggleControl
+								label={ __(
+									'Auto fit to markers',
+									'inblock-map-block'
+								) }
+								checked={ !! markersAutoFit }
+								onChange={ ( value ) =>
+									setAttributes( {
+										markersAutoFit: !! value,
+									} )
+								}
+							/>
+						</>
+					) }
 				</PanelBody>
 			</InspectorControls>
 
