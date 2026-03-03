@@ -1,5 +1,15 @@
 import L from 'leaflet';
 
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+L.Icon.Default.mergeOptions( {
+	iconRetinaUrl: markerIcon2x,
+	iconUrl: markerIcon,
+	shadowUrl: markerShadow,
+} );
+
 function safeJsonParse( text ) {
 	try {
 		return JSON.parse( text );
@@ -70,7 +80,7 @@ function initMap( el ) {
 
 		if ( markersPopup && m.title ) {
 			const title = m.url
-				? `<a href="${ m.url }">${ m.title }</a>`
+				? `<a href=\"${ m.url }\">${ m.title }</a>`
 				: m.title;
 			marker.bindPopup( title );
 		}
