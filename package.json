@@ -1,19 +1,19 @@
 {
-  "name": "inblock-map-block",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Gutenberg block to display an OpenStreetMap and plot items from a selected post type.",
-  "license": "GPL-2.0-or-later",
-  "scripts": {
-    "build": "wp-scripts build src/index.js src/view.js",
-    "start": "wp-scripts start src/index.js src/view.js",
-    "lint:js": "wp-scripts lint-js"
-  },
-  "devDependencies": {
-    "@types/leaflet": "^1.9.21",
-    "@wordpress/scripts": "^30.12.0"
-  },
-  "dependencies": {
-    "leaflet": "^1.9.4"
-  }
+	"name": "inblock-map-block",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Gutenberg block to display an OpenStreetMap and plot items from a selected post type.",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"build": "wp-scripts build src/index.js src/view.js",
+		"start": "wp-scripts start src/index.js src/view.js",
+		"lint:js": "wp-scripts lint-js"
+	},
+	"devDependencies": {
+		"@types/leaflet": "^1.9.21",
+		"@wordpress/scripts": "^30.12.0"
+	},
+	"dependencies": {
+		"leaflet": "^1.9.4"
+	}
 }

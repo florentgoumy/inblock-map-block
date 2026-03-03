@@ -5,7 +5,7 @@ import { useEffect, useRef } from '@wordpress/element';
 import L from 'leaflet';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { lat, lng, zoom } = attributes;
+	const { lat, lng, zoom, height } = attributes;
 	const mapElRef = useRef( null );
 	const mapRef = useRef( null );
 	const markerRef = useRef( null );
@@ -15,7 +15,6 @@ export default function Edit( { attributes, setAttributes } ) {
 			return;
 		}
 
-		// Init map once
 		const map = L.map( mapElRef.current, {
 			zoomControl: true,
 			attributionControl: true,
@@ -26,12 +25,34 @@ export default function Edit( { attributes, setAttributes } ) {
 			attribution: '&copy; OpenStreetMap contributors',
 		} ).addTo( map );
 
-		const marker = L.marker( [ lat, lng ], { draggable: false } ).addTo(
+		const marker = L.marker( [ lat, lng ], { draggable: true } ).addTo(
 			map
 		);
 
 		mapRef.current = map;
 		markerRef.current = marker;
+
+		map.on( 'moveend', () => {
+			const center = map.getCenter();
+			setAttributes( {
+				lat: Number.parseFloat( center.lat.toFixed( 6 ) ),
+				lng: Number.parseFloat( center.lng.toFixed( 6 ) ),
+			} );
+		} );
+
+		map.on( 'zoomend', () => {
+			setAttributes( { zoom: map.getZoom() } );
+		} );
+
+		marker.on( 'dragend', () => {
+			const pos = marker.getLatLng();
+			setAttributes( {
+				lat: Number.parseFloat( pos.lat.toFixed( 6 ) ),
+				lng: Number.parseFloat( pos.lng.toFixed( 6 ) ),
+			} );
+		} );
+
+		setTimeout( () => map.invalidateSize(), 0 );
 
 		return () => {
 			map.remove();
@@ -50,6 +71,13 @@ export default function Edit( { attributes, setAttributes } ) {
 			markerRef.current.setLatLng( [ lat, lng ] );
 		}
 	}, [ lat, lng, zoom ] );
+
+	useEffect( () => {
+		if ( ! mapRef.current ) {
+			return;
+		}
+		setTimeout( () => mapRef.current.invalidateSize(), 0 );
+	}, [ height ] );
 
 	return (
 		<>
@@ -88,10 +116,30 @@ export default function Edit( { attributes, setAttributes } ) {
 						max={ 19 }
 					/>
 				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Dimensions', 'inblock-map-block' ) }
+					initialOpen={ false }
+				>
+					<RangeControl
+						label={ __( 'Height (px)', 'inblock-map-block' ) }
+						value={ height }
+						onChange={ ( value ) =>
+							setAttributes( { height: value } )
+						}
+						min={ 120 }
+						max={ 900 }
+						step={ 10 }
+					/>
+				</PanelBody>
 			</InspectorControls>
 
 			<div { ...useBlockProps() }>
-				<div className="inblock-map-block__map" ref={ mapElRef } />
+				<div
+					className="inblock-map-block__map"
+					ref={ mapElRef }
+					style={ { height: height + 'px' } }
+				/>
 			</div>
 		</>
 	);

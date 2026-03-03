@@ -11,6 +11,7 @@ registerBlockType( 'inblock/map-block', {
 		lat: { type: 'number', default: 48.8566 },
 		lng: { type: 'number', default: 2.3522 },
 		zoom: { type: 'number', default: 12 },
+		height: { type: 'number', default: 320 },
 	},
 	edit: Edit,
 	save: () => null,

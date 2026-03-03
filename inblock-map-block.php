@@ -30,7 +30,11 @@ function inblock_map_block_register_block() {
 		plugins_url( 'build/index.js', __FILE__ ),
 		$asset['dependencies'],
 		$asset['version'],
-		true
+		true,
+		esc_attr( isset(  ) ? (int)  : 320 ),
+		esc_attr( isset(  ) ? (int)  : 320 ),
+		esc_attr( isset(  ) ? (int)  : 320 ),
+		esc_attr( isset(  ) ? (int)  : 320 )
 	);
 
 	wp_register_style(
@@ -80,10 +84,11 @@ function inblock_map_block_render( $attributes ) {
 	$zoom = max( 1, min( 19, $zoom ) );
 
 	$attrs = sprintf(
-		'data-lat="%s" data-lng="%s" data-zoom="%d"',
+		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d"',
 		esc_attr( $lat ),
 		esc_attr( $lng ),
-		$zoom
+		$zoom,
+		esc_attr( isset( $attributes['height'] ) ? (int) $attributes['height'] : 320 )
 	);
 
 	return '<div class="wp-block-inblock-map-block"><div class="inblock-map-block__map" ' . $attrs . '></div></div>';

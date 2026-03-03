@@ -9,6 +9,11 @@ function initMap( el ) {
 		return;
 	}
 
+	const height = Number.parseInt( el.dataset.height || '320', 10 );
+	if ( ! Number.isNaN( height ) ) {
+		el.style.height = height + 'px';
+	}
+
 	const map = L.map( el, {
 		zoomControl: true,
 		attributionControl: true,
