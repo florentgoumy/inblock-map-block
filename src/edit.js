@@ -6,41 +6,53 @@ import {
 	SelectControl,
 	TextControl,
 	ToggleControl,
-	Notice,
+	Tooltip,
+	Icon,
 } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import L from 'leaflet';
 
 async function fetchPostTypes() {
-	const endpoints = [
-		'/wp/v2/types?context=view',
-		'/wp/v2/types?context=edit',
-	];
-
-	let data = null;
-	for ( const path of endpoints ) {
-		try {
-			data = await apiFetch( { path } );
-			if ( data ) {
-				break;
-			}
-		} catch ( e ) {
-			// try next endpoint
-		}
-	}
-
-	if ( ! data ) {
+	const data = await apiFetch( { path: '/inblock-map-block/v1/post-types' } );
+	if ( ! Array.isArray( data ) ) {
 		return [];
 	}
 
-	return Object.values( data )
-		.filter( ( t ) => t && ( t.visibility?.show_ui || t.slug === 'post' ) )
+	return data
 		.map( ( t ) => ( {
-			label: t.name || t.slug,
+			label: t.label,
 			value: t.slug,
 		} ) )
 		.sort( ( a, b ) => a.label.localeCompare( b.label ) );
+}
+
+function MarkersSourceHelp() {
+	const content = (
+		<div>
+			<div>
+				<strong>ACF Location</strong>: field returning an object with
+				<code>lat</code>/<code>lng</code>.
+			</div>
+			<div>
+				<strong>ACF text</strong>: text field with <code>lat,lng</code>{ ' ' }
+				or
+				<code>\u007Blat,lng\u007D</code>.
+			</div>
+			<div>
+				<strong>Post meta</strong>: meta keys (default{ ' ' }
+				<code>inblock_lat</code>/<code>inblock_lng</code>).
+			</div>
+		</div>
+	);
+
+	return (
+		<Tooltip text={ content }>
+			<span style={ { display: 'inline-flex', marginLeft: 6 } }>
+				<Icon icon="info" />
+			</span>
+		</Tooltip>
+	);
 }
 
 export default function Edit( { attributes, setAttributes } ) {
@@ -150,11 +162,6 @@ export default function Edit( { attributes, setAttributes } ) {
 		setTimeout( () => mapRef.current.invalidateSize(), 0 );
 	}, [ height ] );
 
-	const markerSourceHelp =
-		'ACF Location: ACF field returning an object with lat/lng (ex: ACF Pro Google Map).\n' +
-		'ACF text {lat,lng}: ACF text field containing "{45.78,4.99}" or "45.78,4.99".\n' +
-		'Post meta: lat/lng stored in post meta keys (ex: inblock_lat/inblock_lng).';
-
 	return (
 		<>
 			<InspectorControls>
@@ -237,15 +244,26 @@ export default function Edit( { attributes, setAttributes } ) {
 								}
 							/>
 
-							<Notice status="info" isDismissible={ false }>
-								{ markerSourceHelp }
-							</Notice>
+							<div
+								style={ {
+									display: 'flex',
+									alignItems: 'center',
+									gap: 6,
+									marginTop: 8,
+								} }
+							>
+								<span>
+									{ __(
+										'Markers source',
+										'inblock-map-block'
+									) }
+								</span>
+								<MarkersSourceHelp />
+							</div>
 
 							<SelectControl
-								label={ __(
-									'Markers source',
-									'inblock-map-block'
-								) }
+								label=""
+								hideLabelFromVision={ true }
 								value={ markersSource }
 								options={ [
 									{
