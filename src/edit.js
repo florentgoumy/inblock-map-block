@@ -12,17 +12,41 @@ import apiFetch from '@wordpress/api-fetch';
 import L from 'leaflet';
 
 async function fetchPostTypes() {
-	const data = await apiFetch( { path: '/wp/v2/types?context=edit' } );
+	const endpoints = [
+		'/wp/v2/types?context=view',
+		'/wp/v2/types?context=edit',
+	];
+
+	let data = null;
+	for ( const path of endpoints ) {
+		try {
+			data = await apiFetch( { path } );
+			if ( data ) {
+				break;
+			}
+		} catch ( e ) {
+			// try next endpoint
+		}
+	}
+
 	if ( ! data ) {
 		return [];
 	}
 
 	return Object.values( data )
-		.filter( ( t ) => t?.visibility?.public )
+		.filter(
+			( t ) =>
+				t &&
+				( t.viewable ||
+					t.rest_base ||
+					t.slug === 'post' ||
+					t.slug === 'page' )
+		)
 		.map( ( t ) => ( {
-			label: t.name,
+			label: t.name || t.slug,
 			value: t.slug,
-		} ) );
+		} ) )
+		.sort( ( a, b ) => a.label.localeCompare( b.label ) );
 }
 
 export default function Edit( { attributes, setAttributes } ) {
