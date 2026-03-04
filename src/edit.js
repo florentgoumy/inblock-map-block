@@ -13,7 +13,6 @@ import {
 	Tooltip,
 	Icon,
 	ColorPalette,
-	Button,
 } from '@wordpress/components';
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
@@ -245,25 +244,24 @@ export default function Edit( { attributes, setAttributes } ) {
 					title={ __( 'Map settings', 'inblock-map-block' ) }
 					initialOpen
 				>
+					<SelectControl
+						label={ __( 'Post type', 'inblock-map-block' ) }
+						value={ markersPostType }
+						options={ [
+							{ label: '—', value: '' },
+							...postTypeOptions,
+						] }
+						onChange={ ( value ) =>
+							setAttributes( { markersPostType: value } )
+						}
+					/>
+
 					<p>
 						{ __(
 							'Déplacez la carte et zoomez pour définir la vue par défaut.',
 							'inblock-map-block'
 						) }
 					</p>
-
-					<Button
-						variant="secondary"
-						onClick={ () =>
-							setAttributes( {
-								lat: 46.603354,
-								lng: 1.888334,
-								zoom: 6,
-							} )
-						}
-					>
-						{ __( 'Reset (France)', 'inblock-map-block' ) }
-					</Button>
 
 					<SelectControl
 						label={ __( 'Base map', 'inblock-map-block' ) }
@@ -358,18 +356,6 @@ export default function Edit( { attributes, setAttributes } ) {
 
 					{ markersEnabled && (
 						<>
-							<SelectControl
-								label={ __( 'Post type', 'inblock-map-block' ) }
-								value={ markersPostType }
-								options={ [
-									{ label: '—', value: '' },
-									...postTypeOptions,
-								] }
-								onChange={ ( value ) =>
-									setAttributes( { markersPostType: value } )
-								}
-							/>
-
 							<div
 								style={ {
 									display: 'flex',
