@@ -9,6 +9,7 @@ import {
 	Tooltip,
 	Icon,
 	ColorPalette,
+	Button,
 } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
@@ -236,6 +237,18 @@ export default function Edit( { attributes, setAttributes } ) {
 							setAttributes( { baseMap: value } )
 						}
 					/>
+					<Button
+						variant="secondary"
+						onClick={ () =>
+							setAttributes( {
+								lat: 48.8566,
+								lng: 2.3522,
+								zoom: 12,
+							} )
+						}
+					>
+						{ __( 'Reset (Paris)', 'inblock-map-block' ) }
+					</Button>
 				</PanelBody>
 
 				<PanelBody
