@@ -70,6 +70,10 @@
 		"markerColor": {
 			"type": "string",
 			"default": "#2563eb"
+		},
+		"baseMap": {
+			"type": "string",
+			"default": "osm"
 		}
 	},
 	"editorScript": "file:./build/index.js",

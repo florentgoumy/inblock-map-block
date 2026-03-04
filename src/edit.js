@@ -15,6 +15,7 @@ import apiFetch from '@wordpress/api-fetch';
 import L from 'leaflet';
 
 import './leaflet-icons';
+import { getTileConfig } from './tile';
 
 async function fetchPostTypes() {
 	const data = await apiFetch( { path: '/inblock-map-block/v1/post-types' } );
@@ -75,12 +76,14 @@ export default function Edit( { attributes, setAttributes } ) {
 		markersAutoFit,
 		markerStyle,
 		markerColor,
+		baseMap,
 	} = attributes;
 
 	const [ postTypeOptions, setPostTypeOptions ] = useState( [] );
 
 	const mapElRef = useRef( null );
 	const mapRef = useRef( null );
+	const markersLayerRef = useRef( null );
 
 	useEffect( () => {
 		let cancelled = false;
@@ -107,12 +110,15 @@ export default function Edit( { attributes, setAttributes } ) {
 			attributionControl: true,
 		} ).setView( [ lat, lng ], zoom );
 
-		L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			maxZoom: 19,
-			attribution: '&copy; OpenStreetMap contributors',
+		const tile = getTileConfig( baseMap );
+
+		L.tileLayer( tile.url, {
+			maxZoom: tile.maxZoom,
+			attribution: tile.attribution,
 		} ).addTo( map );
 
 		mapRef.current = map;
+		markersLayerRef.current = L.layerGroup().addTo( map );
 
 		map.on( 'moveend', () => {
 			const center = map.getCenter();
@@ -131,6 +137,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		return () => {
 			map.remove();
 			mapRef.current = null;
+			markersLayerRef.current = null;
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
@@ -141,6 +148,57 @@ export default function Edit( { attributes, setAttributes } ) {
 		}
 		mapRef.current.setView( [ lat, lng ], zoom, { animate: false } );
 	}, [ lat, lng, zoom ] );
+
+	useEffect( () => {
+		if ( ! mapRef.current || ! markersLayerRef.current ) {
+			return;
+		}
+		markersLayerRef.current.clearLayers();
+
+		if ( ! markersEnabled ) {
+			return;
+		}
+
+		const root = mapElRef.current?.closest( '.wp-block-inblock-map-block' );
+		const script = root?.querySelector( '.inblock-map-block__markers' );
+		if ( ! script?.textContent ) {
+			return;
+		}
+
+		let markers = [];
+		try {
+			markers = JSON.parse( script.textContent );
+		} catch ( e ) {
+			return;
+		}
+
+		const bounds = [];
+		markers.forEach( ( m ) => {
+			if ( typeof m?.lat !== 'number' || typeof m?.lng !== 'number' ) {
+				return;
+			}
+			bounds.push( [ m.lat, m.lng ] );
+			if ( markerStyle === 'circle' ) {
+				L.circleMarker( [ m.lat, m.lng ], {
+					radius: 8,
+					color: markerColor,
+					fillColor: markerColor,
+					fillOpacity: 0.9,
+					weight: 2,
+				} ).addTo( markersLayerRef.current );
+			} else {
+				L.marker( [ m.lat, m.lng ] ).addTo( markersLayerRef.current );
+			}
+		} );
+
+		if ( markersAutoFit && bounds.length >= 1 ) {
+			if ( bounds.length === 1 ) {
+				mapRef.current.setView( bounds[ 0 ], zoom, { animate: false } );
+			} else {
+				mapRef.current.fitBounds( bounds, { padding: [ 20, 20 ] } );
+			}
+		}
+	}, [ markersEnabled, markerStyle, markerColor, markersAutoFit, zoom ] );
 
 	useEffect( () => {
 		if ( ! mapRef.current ) {
@@ -162,6 +220,22 @@ export default function Edit( { attributes, setAttributes } ) {
 							'inblock-map-block'
 						) }
 					</p>
+					<SelectControl
+						label={ __( 'Base map', 'inblock-map-block' ) }
+						value={ baseMap }
+						options={ [
+							{ label: 'OpenStreetMap', value: 'osm' },
+							{
+								label: 'CARTO Positron',
+								value: 'carto_positron',
+							},
+							{ label: 'CARTO Dark', value: 'carto_dark' },
+							{ label: 'OpenTopoMap', value: 'opentopo' },
+						] }
+						onChange={ ( value ) =>
+							setAttributes( { baseMap: value } )
+						}
+					/>
 				</PanelBody>
 
 				<PanelBody

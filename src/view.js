@@ -37,15 +37,32 @@ function initMap( el ) {
 	const markersAutoFit = el.dataset.markersAutoFit === '1';
 	const markerStyle = el.dataset.markerStyle || 'default';
 	const markerColor = el.dataset.markerColor || '#2563eb';
+	const baseMap = el.dataset.baseMap || 'osm';
 
 	const map = L.map( el, {
 		zoomControl: true,
 		attributionControl: true,
 	} ).setView( [ lat, lng ], zoom );
 
-	L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	let tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+	let tileAttribution = '&copy; OpenStreetMap contributors';
+	if ( baseMap === 'carto_positron' ) {
+		tileUrl =
+			'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+		tileAttribution = '&copy; OpenStreetMap contributors &copy; CARTO';
+	} else if ( baseMap === 'carto_dark' ) {
+		tileUrl =
+			'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+		tileAttribution = '&copy; OpenStreetMap contributors &copy; CARTO';
+	} else if ( baseMap === 'opentopo' ) {
+		tileUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
+		tileAttribution =
+			'&copy; OpenStreetMap contributors, SRTM | OpenTopoMap';
+	}
+
+	L.tileLayer( tileUrl, {
 		maxZoom: 19,
-		attribution: '&copy; OpenStreetMap contributors',
+		attribution: tileAttribution,
 	} ).addTo( map );
 
 	const markersEnabled = el.dataset.markersEnabled === '1';

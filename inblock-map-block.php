@@ -4,7 +4,7 @@
  * Description:       Gutenberg block to display an OpenStreetMap and plot items from a selected post type.
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Version:           0.1.4
+ * Version:           0.1.5
  * Author:            Inblock
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -92,6 +92,7 @@ function inblock_map_block_render( $attributes ) {
 	$markers_autofit  = isset( $attributes['markersAutoFit'] ) ? (bool) $attributes['markersAutoFit'] : true;
 	$marker_style     = isset( $attributes['markerStyle'] ) ? (string) $attributes['markerStyle'] : 'default';
 	$marker_color     = isset( $attributes['markerColor'] ) ? (string) $attributes['markerColor'] : '#2563eb';
+	$base_map         = isset( $attributes['baseMap'] ) ? (string) $attributes['baseMap'] : 'osm';
 
 	// Basic clamping (safety).
 	$lat  = max( -90.0, min( 90.0, $lat ) );
@@ -173,7 +174,7 @@ function inblock_map_block_render( $attributes ) {
 	}
 
 	$attrs = sprintf(
-		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d" data-markers-popup="%d" data-markers-enabled="%d" data-markers-auto-fit="%d" data-marker-style="%s"  data-marker-color="%s"',
+		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d" data-markers-popup="%d" data-markers-enabled="%d" data-markers-auto-fit="%d" data-marker-style="%s"  data-marker-color="%s" data-base-map="%s"',
 		esc_attr( $lat ),
 		esc_attr( $lng ),
 		$zoom,
@@ -182,7 +183,8 @@ function inblock_map_block_render( $attributes ) {
 		$markers_enabled ? 1 : 0,
 		$markers_autofit ? 1 : 0,
 		esc_attr( $marker_style ),
-		esc_attr( $marker_color )
+		esc_attr( $marker_color ),
+		esc_attr( $base_map )
 	);
 
 	$markers_json = wp_json_encode( $markers );
