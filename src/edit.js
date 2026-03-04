@@ -81,7 +81,6 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	const mapElRef = useRef( null );
 	const mapRef = useRef( null );
-	const markerRef = useRef( null );
 
 	useEffect( () => {
 		let cancelled = false;
@@ -113,12 +112,7 @@ export default function Edit( { attributes, setAttributes } ) {
 			attribution: '&copy; OpenStreetMap contributors',
 		} ).addTo( map );
 
-		const marker = L.marker( [ lat, lng ], { draggable: true } ).addTo(
-			map
-		);
-
 		mapRef.current = map;
-		markerRef.current = marker;
 
 		map.on( 'moveend', () => {
 			const center = map.getCenter();
@@ -132,20 +126,11 @@ export default function Edit( { attributes, setAttributes } ) {
 			setAttributes( { zoom: map.getZoom() } );
 		} );
 
-		marker.on( 'dragend', () => {
-			const pos = marker.getLatLng();
-			setAttributes( {
-				lat: Number.parseFloat( pos.lat.toFixed( 6 ) ),
-				lng: Number.parseFloat( pos.lng.toFixed( 6 ) ),
-			} );
-		} );
-
 		setTimeout( () => map.invalidateSize(), 0 );
 
 		return () => {
 			map.remove();
 			mapRef.current = null;
-			markerRef.current = null;
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
@@ -155,9 +140,6 @@ export default function Edit( { attributes, setAttributes } ) {
 			return;
 		}
 		mapRef.current.setView( [ lat, lng ], zoom, { animate: false } );
-		if ( markerRef.current ) {
-			markerRef.current.setLatLng( [ lat, lng ] );
-		}
 	}, [ lat, lng, zoom ] );
 
 	useEffect( () => {
@@ -172,7 +154,19 @@ export default function Edit( { attributes, setAttributes } ) {
 			<InspectorControls>
 				<PanelBody
 					title={ __( 'Map settings', 'inblock-map-block' ) }
-					initialOpen={ true }
+					initialOpen
+				>
+					<p>
+						{ __(
+							'Déplacez la carte et zoomez pour définir la vue par défaut.',
+							'inblock-map-block'
+						) }
+					</p>
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Advanced', 'inblock-map-block' ) }
+					initialOpen={ false }
 				>
 					<RangeControl
 						label={ __( 'Latitude', 'inblock-map-block' ) }
@@ -243,9 +237,7 @@ export default function Edit( { attributes, setAttributes } ) {
 									...postTypeOptions,
 								] }
 								onChange={ ( value ) =>
-									setAttributes( {
-										markersPostType: value,
-									} )
+									setAttributes( { markersPostType: value } )
 								}
 							/>
 
