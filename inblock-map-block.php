@@ -122,41 +122,37 @@ function inblock_map_block_render( $attributes ) {
 				$point_lng = null;
 
 				if ( 'acf_location' === $markers_source && function_exists( 'get_field' ) ) {
-					$loc = get_field( $acf_field, $post_id );
-					if ( is_array( $loc ) && isset( $loc['lat'], $loc['lng'] ) ) {
-						$point_lat = (float) $loc['lat'];
-						$point_lng = (float) $loc['lng'];
-					}
-				} elseif ( 'acf_text_latlng' === $markers_source && function_exists( 'get_field' ) ) {
-					$raw = get_field( $acf_field, $post_id );
-					if ( is_string( $raw ) ) {
-						$raw = trim( $raw );
-						$raw = trim( $raw, "{}()[]" );
-						// Expected: "lat,lng" (with dot decimals). Example: 45.7885, 4.9980
-						$parts = array_map( 'trim', explode( ',', $raw ) );
-						if ( count( $parts ) >= 2 ) {
-							$a = (float) $parts[0];
-							$b = (float) $parts[1];
-							// Auto-swap if it looks like lng,lat.
-							if ( abs( $a ) > 90 && abs( $b ) <= 90 ) {
-								$point_lat = $b;
-								$point_lng = $a;
-							} else {
-								$point_lat = $a;
-								$point_lng = $b;
-							}
-						}
-					}
-} elseif ( 'meta_latlng' === $markers_source ) {
-					$meta_lat = get_post_meta( $post_id, $lat_meta_key, true );
-					$meta_lng = get_post_meta( $post_id, $lng_meta_key, true );
-					if ( '' !== $meta_lat && '' !== $meta_lng ) {
-						$point_lat = (float) $meta_lat;
-						$point_lng = (float) $meta_lng;
-					}
-				}
-
-				if ( null === $point_lat || null === $point_lng ) {
+								$loc = get_field( $acf_field, $post_id );
+								if ( is_array( $loc ) && isset( $loc['lat'], $loc['lng'] ) ) {
+									$point_lat = (float) $loc['lat'];
+									$point_lng = (float) $loc['lng'];
+								}
+							} elseif ( 'acf_text_latlng' === $markers_source && function_exists( 'get_field' ) ) {
+								$raw = get_field( $acf_field, $post_id );
+								if ( is_string( $raw ) ) {
+									$raw = trim( $raw );
+									$raw = trim( $raw, "{}()[]" );
+									$parts = array_map( 'trim', explode( ',', $raw ) );
+									if ( count( $parts ) >= 2 ) {
+										$a = (float) $parts[0];
+										$b = (float) $parts[1];
+										if ( abs( $a ) > 90 && abs( $b ) <= 90 ) {
+											$point_lat = $b;
+											$point_lng = $a;
+										} else {
+											$point_lat = $a;
+											$point_lng = $b;
+										}
+									}
+								}
+							} elseif ( 'meta_latlng' === $markers_source ) {
+								$meta_lat = get_post_meta( $post_id, $lat_meta_key, true );
+								$meta_lng = get_post_meta( $post_id, $lng_meta_key, true );
+								if ( '' !== $meta_lat && '' !== $meta_lng ) {
+									$point_lat = (float) $meta_lat;
+									$point_lng = (float) $meta_lng;
+								}
+							}if ( null === $point_lat || null === $point_lng ) {
 					continue;
 				}
 
