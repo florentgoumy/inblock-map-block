@@ -1,6 +1,6 @@
 {
 	"name": "inblock-map-block",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"private": true,
 	"description": "Gutenberg block to display an OpenStreetMap and plot items from a selected post type.",
 	"license": "GPL-2.0-or-later",
