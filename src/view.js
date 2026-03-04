@@ -1,14 +1,6 @@
 import L from 'leaflet';
 
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-L.Icon.Default.mergeOptions( {
-	iconRetinaUrl: markerIcon2x,
-	iconUrl: markerIcon,
-	shadowUrl: markerShadow,
-} );
+import './leaflet-icons';
 
 function safeJsonParse( text ) {
 	try {
@@ -110,8 +102,12 @@ function initMap( el ) {
 		}
 	} );
 
-	if ( markersAutoFit && bounds.length > 1 ) {
-		map.fitBounds( bounds, { padding: [ 20, 20 ] } );
+	if ( markersAutoFit && bounds.length >= 1 ) {
+		if ( bounds.length === 1 ) {
+			map.setView( bounds[ 0 ], zoom, { animate: false } );
+		} else {
+			map.fitBounds( bounds, { padding: [ 20, 20 ] } );
+		}
 	}
 }
 

@@ -8,10 +8,13 @@ import {
 	ToggleControl,
 	Tooltip,
 	Icon,
+	ColorPalette,
 } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import L from 'leaflet';
+
+import './leaflet-icons';
 
 async function fetchPostTypes() {
 	const data = await apiFetch( { path: '/inblock-map-block/v1/post-types' } );
@@ -382,19 +385,12 @@ export default function Edit( { attributes, setAttributes } ) {
 							/>
 
 							{ markerStyle === 'circle' && (
-								<TextControl
-									label={ __(
-										'Marker color',
-										'inblock-map-block'
-									) }
-									helperText={ __(
-										'Hex color, e.g. #2563eb',
-										'inblock-map-block'
-									) }
+								<ColorPalette
 									value={ markerColor }
 									onChange={ ( value ) =>
 										setAttributes( { markerColor: value } )
 									}
+									clearable={ false }
 								/>
 							) }
 						</>
