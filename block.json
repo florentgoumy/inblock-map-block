@@ -74,6 +74,9 @@
 		"baseMap": {
 			"type": "string",
 			"default": "osm"
+		},
+		"lastEdited": {
+			"type": "number"
 		}
 	},
 	"editorScript": "file:./build/index.js",

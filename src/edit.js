@@ -247,7 +247,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							} )
 						}
 					>
-						{ __( 'Reset (Paris)', 'inblock-map-block' ) }
+						{ __( 'Reset (France)', 'inblock-map-block' ) }
 					</Button>
 				</PanelBody>
 
@@ -259,7 +259,10 @@ export default function Edit( { attributes, setAttributes } ) {
 						label={ __( 'Latitude', 'inblock-map-block' ) }
 						value={ lat }
 						onChange={ ( value ) =>
-							setAttributes( { lat: value } )
+							setAttributes( {
+								lat: value,
+								lastEdited: Date.now(),
+							} )
 						}
 						min={ -90 }
 						max={ 90 }
@@ -269,7 +272,10 @@ export default function Edit( { attributes, setAttributes } ) {
 						label={ __( 'Longitude', 'inblock-map-block' ) }
 						value={ lng }
 						onChange={ ( value ) =>
-							setAttributes( { lng: value } )
+							setAttributes( {
+								lng: value,
+								lastEdited: Date.now(),
+							} )
 						}
 						min={ -180 }
 						max={ 180 }
@@ -279,7 +285,10 @@ export default function Edit( { attributes, setAttributes } ) {
 						label={ __( 'Zoom', 'inblock-map-block' ) }
 						value={ zoom }
 						onChange={ ( value ) =>
-							setAttributes( { zoom: value } )
+							setAttributes( {
+								zoom: value,
+								lastEdited: Date.now(),
+							} )
 						}
 						min={ 1 }
 						max={ 19 }
@@ -310,7 +319,10 @@ export default function Edit( { attributes, setAttributes } ) {
 						label={ __( 'Enable markers', 'inblock-map-block' ) }
 						checked={ !! markersEnabled }
 						onChange={ ( enabled ) =>
-							setAttributes( { markersEnabled: !! enabled } )
+							setAttributes( {
+								markersEnabled: !! enabled,
+								lastEdited: Date.now(),
+							} )
 						}
 					/>
 
@@ -324,7 +336,10 @@ export default function Edit( { attributes, setAttributes } ) {
 									...postTypeOptions,
 								] }
 								onChange={ ( value ) =>
-									setAttributes( { markersPostType: value } )
+									setAttributes( {
+										markersPostType: value,
+										lastEdited: Date.now(),
+									} )
 								}
 							/>
 
@@ -364,7 +379,10 @@ export default function Edit( { attributes, setAttributes } ) {
 									},
 								] }
 								onChange={ ( value ) =>
-									setAttributes( { markersSource: value } )
+									setAttributes( {
+										markersSource: value,
+										lastEdited: Date.now(),
+									} )
 								}
 							/>
 
@@ -467,7 +485,10 @@ export default function Edit( { attributes, setAttributes } ) {
 								<ColorPalette
 									value={ markerColor }
 									onChange={ ( value ) =>
-										setAttributes( { markerColor: value } )
+										setAttributes( {
+											markerColor: value,
+											lastEdited: Date.now(),
+										} )
 									}
 									clearable={ false }
 								/>
