@@ -1,5 +1,9 @@
 import { __ } from '@wordpress/i18n';
-import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import {
+	InspectorControls,
+	useBlockProps,
+	useSetting,
+} from '@wordpress/block-editor';
 import {
 	PanelBody,
 	RangeControl,
@@ -11,7 +15,7 @@ import {
 	ColorPalette,
 	Button,
 } from '@wordpress/components';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import L from 'leaflet';
 
@@ -36,13 +40,12 @@ function MarkersSourceHelp() {
 	const content = (
 		<div>
 			<div>
-				<strong>ACF Location</strong>: field returning an object with
+				<strong>ACF Location</strong>: field returning an object with{ ' ' }
 				<code>lat</code>/<code>lng</code>.
 			</div>
 			<div>
 				<strong>ACF text</strong>: text field with <code>lat,lng</code>{ ' ' }
-				or
-				<code>\u007Blat,lng\u007D</code>.
+				or <code>\u007Blat,lng\u007D</code>.
 			</div>
 			<div>
 				<strong>Post meta</strong>: meta keys (default{ ' ' }
@@ -66,6 +69,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		lng,
 		zoom,
 		height,
+		baseMap,
 		markersEnabled,
 		markersPostType,
 		markersSource,
@@ -77,13 +81,19 @@ export default function Edit( { attributes, setAttributes } ) {
 		markersAutoFit,
 		markerStyle,
 		markerColor,
-		baseMap,
+		showStartPosition,
 	} = attributes;
+
+	const themeColors = useSetting( 'color.palette' );
+	const allowCustomColors = useSetting( 'color.custom' );
+	const colors = useMemo( () => themeColors || [], [ themeColors ] );
 
 	const [ postTypeOptions, setPostTypeOptions ] = useState( [] );
 
+	const wrapperRef = useRef( null );
 	const mapElRef = useRef( null );
 	const mapRef = useRef( null );
+	const tileLayerRef = useRef( null );
 	const markersLayerRef = useRef( null );
 
 	useEffect( () => {
@@ -112,13 +122,13 @@ export default function Edit( { attributes, setAttributes } ) {
 		} ).setView( [ lat, lng ], zoom );
 
 		const tile = getTileConfig( baseMap );
-
-		L.tileLayer( tile.url, {
+		const layer = L.tileLayer( tile.url, {
 			maxZoom: tile.maxZoom,
 			attribution: tile.attribution,
 		} ).addTo( map );
 
 		mapRef.current = map;
+		tileLayerRef.current = layer;
 		markersLayerRef.current = L.layerGroup().addTo( map );
 
 		map.on( 'moveend', () => {
@@ -138,6 +148,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		return () => {
 			map.remove();
 			mapRef.current = null;
+			tileLayerRef.current = null;
 			markersLayerRef.current = null;
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -151,6 +162,26 @@ export default function Edit( { attributes, setAttributes } ) {
 	}, [ lat, lng, zoom ] );
 
 	useEffect( () => {
+		if ( ! mapRef.current ) {
+			return;
+		}
+		setTimeout( () => mapRef.current.invalidateSize(), 0 );
+	}, [ height ] );
+
+	useEffect( () => {
+		if ( ! mapRef.current || ! tileLayerRef.current ) {
+			return;
+		}
+		// Replace tile layer.
+		tileLayerRef.current.remove();
+		const tile = getTileConfig( baseMap );
+		tileLayerRef.current = L.tileLayer( tile.url, {
+			maxZoom: tile.maxZoom,
+			attribution: tile.attribution,
+		} ).addTo( mapRef.current );
+	}, [ baseMap ] );
+
+	useEffect( () => {
 		if ( ! mapRef.current || ! markersLayerRef.current ) {
 			return;
 		}
@@ -160,7 +191,8 @@ export default function Edit( { attributes, setAttributes } ) {
 			return;
 		}
 
-		const root = mapElRef.current?.closest( '.wp-block-inblock-map-block' );
+		// Read markers from SSR JSON.
+		const root = wrapperRef.current;
 		const script = root?.querySelector( '.inblock-map-block__markers' );
 		if ( ! script?.textContent ) {
 			return;
@@ -174,11 +206,14 @@ export default function Edit( { attributes, setAttributes } ) {
 		}
 
 		const bounds = [];
+
 		markers.forEach( ( m ) => {
 			if ( typeof m?.lat !== 'number' || typeof m?.lng !== 'number' ) {
 				return;
 			}
+
 			bounds.push( [ m.lat, m.lng ] );
+
 			if ( markerStyle === 'circle' ) {
 				L.circleMarker( [ m.lat, m.lng ], {
 					radius: 8,
@@ -201,12 +236,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		}
 	}, [ markersEnabled, markerStyle, markerColor, markersAutoFit, zoom ] );
 
-	useEffect( () => {
-		if ( ! mapRef.current ) {
-			return;
-		}
-		setTimeout( () => mapRef.current.invalidateSize(), 0 );
-	}, [ height ] );
+	const blockProps = useBlockProps( { ref: wrapperRef } );
 
 	return (
 		<>
@@ -221,6 +251,20 @@ export default function Edit( { attributes, setAttributes } ) {
 							'inblock-map-block'
 						) }
 					</p>
+
+					<Button
+						variant="secondary"
+						onClick={ () =>
+							setAttributes( {
+								lat: 46.603354,
+								lng: 1.888334,
+								zoom: 6,
+							} )
+						}
+					>
+						{ __( 'Reset (France)', 'inblock-map-block' ) }
+					</Button>
+
 					<SelectControl
 						label={ __( 'Base map', 'inblock-map-block' ) }
 						value={ baseMap }
@@ -237,62 +281,51 @@ export default function Edit( { attributes, setAttributes } ) {
 							setAttributes( { baseMap: value } )
 						}
 					/>
-					<Button
-						variant="secondary"
-						onClick={ () =>
-							setAttributes( {
-								lat: 48.8566,
-								lng: 2.3522,
-								zoom: 12,
-							} )
-						}
-					>
-						{ __( 'Reset (France)', 'inblock-map-block' ) }
-					</Button>
-				</PanelBody>
 
-				<PanelBody
-					title={ __( 'Advanced', 'inblock-map-block' ) }
-					initialOpen={ false }
-				>
-					<RangeControl
-						label={ __( 'Latitude', 'inblock-map-block' ) }
-						value={ lat }
+					<ToggleControl
+						label={ __(
+							'Show start position (debug)',
+							'inblock-map-block'
+						) }
+						checked={ !! showStartPosition }
 						onChange={ ( value ) =>
-							setAttributes( {
-								lat: value,
-								lastEdited: Date.now(),
-							} )
+							setAttributes( { showStartPosition: !! value } )
 						}
-						min={ -90 }
-						max={ 90 }
-						step={ 0.0001 }
 					/>
-					<RangeControl
-						label={ __( 'Longitude', 'inblock-map-block' ) }
-						value={ lng }
-						onChange={ ( value ) =>
-							setAttributes( {
-								lng: value,
-								lastEdited: Date.now(),
-							} )
-						}
-						min={ -180 }
-						max={ 180 }
-						step={ 0.0001 }
-					/>
-					<RangeControl
-						label={ __( 'Zoom', 'inblock-map-block' ) }
-						value={ zoom }
-						onChange={ ( value ) =>
-							setAttributes( {
-								zoom: value,
-								lastEdited: Date.now(),
-							} )
-						}
-						min={ 1 }
-						max={ 19 }
-					/>
+
+					{ showStartPosition && (
+						<>
+							<RangeControl
+								label={ __( 'Latitude', 'inblock-map-block' ) }
+								value={ lat }
+								onChange={ ( value ) =>
+									setAttributes( { lat: value } )
+								}
+								min={ -90 }
+								max={ 90 }
+								step={ 0.0001 }
+							/>
+							<RangeControl
+								label={ __( 'Longitude', 'inblock-map-block' ) }
+								value={ lng }
+								onChange={ ( value ) =>
+									setAttributes( { lng: value } )
+								}
+								min={ -180 }
+								max={ 180 }
+								step={ 0.0001 }
+							/>
+							<RangeControl
+								label={ __( 'Zoom', 'inblock-map-block' ) }
+								value={ zoom }
+								onChange={ ( value ) =>
+									setAttributes( { zoom: value } )
+								}
+								min={ 1 }
+								max={ 19 }
+							/>
+						</>
+					) }
 				</PanelBody>
 
 				<PanelBody
@@ -319,10 +352,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						label={ __( 'Enable markers', 'inblock-map-block' ) }
 						checked={ !! markersEnabled }
 						onChange={ ( enabled ) =>
-							setAttributes( {
-								markersEnabled: !! enabled,
-								lastEdited: Date.now(),
-							} )
+							setAttributes( { markersEnabled: !! enabled } )
 						}
 					/>
 
@@ -336,10 +366,7 @@ export default function Edit( { attributes, setAttributes } ) {
 									...postTypeOptions,
 								] }
 								onChange={ ( value ) =>
-									setAttributes( {
-										markersPostType: value,
-										lastEdited: Date.now(),
-									} )
+									setAttributes( { markersPostType: value } )
 								}
 							/>
 
@@ -379,10 +406,7 @@ export default function Edit( { attributes, setAttributes } ) {
 									},
 								] }
 								onChange={ ( value ) =>
-									setAttributes( {
-										markersSource: value,
-										lastEdited: Date.now(),
-									} )
+									setAttributes( { markersSource: value } )
 								}
 							/>
 
@@ -483,13 +507,12 @@ export default function Edit( { attributes, setAttributes } ) {
 
 							{ markerStyle === 'circle' && (
 								<ColorPalette
+									colors={ colors }
 									value={ markerColor }
 									onChange={ ( value ) =>
-										setAttributes( {
-											markerColor: value,
-											lastEdited: Date.now(),
-										} )
+										setAttributes( { markerColor: value } )
 									}
+									disableCustomColors={ ! allowCustomColors }
 									clearable={ false }
 								/>
 							) }
@@ -498,7 +521,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				</PanelBody>
 			</InspectorControls>
 
-			<div { ...useBlockProps() }>
+			<div { ...blockProps }>
 				<div
 					className="inblock-map-block__map"
 					ref={ mapElRef }

@@ -75,8 +75,9 @@
 			"type": "string",
 			"default": "osm"
 		},
-		"lastEdited": {
-			"type": "number"
+		"showStartPosition": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"editorScript": "file:./build/index.js",
