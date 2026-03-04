@@ -177,7 +177,7 @@ function inblock_map_block_render( $attributes ) {
 	}
 
 	$attrs = sprintf(
-		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d" data-markers-popup="%d" data-markers-auto-fit="%d" data-marker-style="%s" data-marker-color="%s",
+		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d" data-markers-popup="%d" data-markers-auto-fit="%d" data-marker-style="%s"  data-marker-color="%s"',
 		esc_attr( $lat ),
 		esc_attr( $lng ),
 		$zoom,
