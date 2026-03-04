@@ -48,14 +48,18 @@ function initMap( el ) {
 		attribution: '&copy; OpenStreetMap contributors',
 	} ).addTo( map );
 
-	const markers = [
-		{
-			lat,
-			lng,
-			title: null,
-			url: null,
-		},
-	];
+	const markersEnabled = el.dataset.markersEnabled === '1';
+
+	const markers = markersEnabled
+		? []
+		: [
+				{
+					lat,
+					lng,
+					title: null,
+					url: null,
+				},
+		  ];
 
 	const markersScript = el
 		.closest( '.wp-block-inblock-map-block' )
