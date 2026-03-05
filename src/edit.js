@@ -256,13 +256,6 @@ export default function Edit( { attributes, setAttributes } ) {
 						}
 					/>
 
-					<p>
-						{ __(
-							'Déplacez la carte et zoomez pour définir la vue par défaut.',
-							'inblock-map-block'
-						) }
-					</p>
-
 					<SelectControl
 						label={ __( 'Base map', 'inblock-map-block' ) }
 						value={ baseMap }
@@ -279,6 +272,13 @@ export default function Edit( { attributes, setAttributes } ) {
 							setAttributes( { baseMap: value } )
 						}
 					/>
+
+					<p>
+						{ __(
+							'Déplacez la carte et zoomez pour définir la vue par défaut.',
+							'inblock-map-block'
+						) }
+					</p>
 
 					<ToggleControl
 						label={ __(
