@@ -17,6 +17,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import L from 'leaflet';
+import 'leaflet.markercluster';
 
 import './leaflet-icons';
 import { getTileConfig } from './tile';
@@ -69,6 +70,9 @@ export default function Edit( { attributes, setAttributes } ) {
 		zoom,
 		height,
 		baseMap,
+		customBaseMapEnabled,
+		customBaseMapUrl,
+		customBaseMapAttribution,
 		markersEnabled,
 		markersPostType,
 		markersSource,
@@ -80,6 +84,12 @@ export default function Edit( { attributes, setAttributes } ) {
 		markersAutoFit,
 		markerStyle,
 		markerColor,
+		markersCluster,
+		markersClusterDisableAtZoom,
+		customMarkerEnabled,
+		customMarkerUrl,
+		customMarkerWidth,
+		customMarkerHeight,
 		showStartPosition,
 	} = attributes;
 
@@ -120,7 +130,11 @@ export default function Edit( { attributes, setAttributes } ) {
 			attributionControl: true,
 		} ).setView( [ lat, lng ], zoom );
 
-		const tile = getTileConfig( baseMap );
+		const tile = getTileConfig( baseMap, {
+			enabled: !! customBaseMapEnabled,
+			url: customBaseMapUrl,
+			attribution: customBaseMapAttribution,
+		} );
 		const layer = L.tileLayer( tile.url, {
 			maxZoom: tile.maxZoom,
 			attribution: tile.attribution,
@@ -128,7 +142,7 @@ export default function Edit( { attributes, setAttributes } ) {
 
 		mapRef.current = map;
 		tileLayerRef.current = layer;
-		markersLayerRef.current = L.layerGroup().addTo( map );
+		markersLayerRef.current = null;
 
 		map.on( 'moveend', () => {
 			const center = map.getCenter();
@@ -173,18 +187,36 @@ export default function Edit( { attributes, setAttributes } ) {
 		}
 		// Replace tile layer.
 		tileLayerRef.current.remove();
-		const tile = getTileConfig( baseMap );
+		const tile = getTileConfig( baseMap, {
+			enabled: !! customBaseMapEnabled,
+			url: customBaseMapUrl,
+			attribution: customBaseMapAttribution,
+		} );
 		tileLayerRef.current = L.tileLayer( tile.url, {
 			maxZoom: tile.maxZoom,
 			attribution: tile.attribution,
 		} ).addTo( mapRef.current );
-	}, [ baseMap ] );
+	}, [
+		baseMap,
+		customBaseMapEnabled,
+		customBaseMapUrl,
+		customBaseMapAttribution,
+	] );
 
 	useEffect( () => {
-		if ( ! mapRef.current || ! markersLayerRef.current ) {
+		if ( ! mapRef.current ) {
 			return;
 		}
-		markersLayerRef.current.clearLayers();
+		if ( markersLayerRef.current ) {
+			markersLayerRef.current.clearLayers();
+			markersLayerRef.current.remove();
+		}
+		markersLayerRef.current = markersCluster
+			? L.markerClusterGroup( {
+					disableClusteringAtZoom: markersClusterDisableAtZoom,
+			  } )
+			: L.layerGroup();
+		markersLayerRef.current.addTo( mapRef.current );
 
 		if ( ! markersEnabled ) {
 			return;
@@ -221,6 +253,25 @@ export default function Edit( { attributes, setAttributes } ) {
 					fillOpacity: 0.9,
 					weight: 2,
 				} ).addTo( markersLayerRef.current );
+			} else if ( markerStyle === 'dot' ) {
+				L.circleMarker( [ m.lat, m.lng ], {
+					radius: 5,
+					color: markerColor,
+					fillColor: markerColor,
+					fillOpacity: 0.9,
+					weight: 2,
+				} ).addTo( markersLayerRef.current );
+			} else if ( customMarkerEnabled && customMarkerUrl ) {
+				L.marker( [ m.lat, m.lng ], {
+					icon: L.icon( {
+						iconUrl: customMarkerUrl,
+						iconSize: [ customMarkerWidth, customMarkerHeight ],
+						iconAnchor: [
+							Math.round( customMarkerWidth / 2 ),
+							customMarkerHeight,
+						],
+					} ),
+				} ).addTo( markersLayerRef.current );
 			} else {
 				L.marker( [ m.lat, m.lng ] ).addTo( markersLayerRef.current );
 			}
@@ -233,7 +284,19 @@ export default function Edit( { attributes, setAttributes } ) {
 				mapRef.current.fitBounds( bounds, { padding: [ 20, 20 ] } );
 			}
 		}
-	}, [ markersEnabled, markerStyle, markerColor, markersAutoFit, zoom ] );
+	}, [
+		markersEnabled,
+		markerStyle,
+		markerColor,
+		markersAutoFit,
+		markersCluster,
+		markersClusterDisableAtZoom,
+		customMarkerEnabled,
+		customMarkerUrl,
+		customMarkerWidth,
+		customMarkerHeight,
+		zoom,
+	] );
 
 	const blockProps = useBlockProps( { ref: wrapperRef } );
 
@@ -266,7 +329,6 @@ export default function Edit( { attributes, setAttributes } ) {
 								value: 'carto_positron',
 							},
 							{ label: 'CARTO Dark', value: 'carto_dark' },
-							{ label: 'OpenTopoMap', value: 'opentopo' },
 						] }
 						onChange={ ( value ) =>
 							setAttributes( { baseMap: value } )
@@ -485,6 +547,7 @@ export default function Edit( { attributes, setAttributes } ) {
 								options={ [
 									{ label: 'Default', value: 'default' },
 									{ label: 'Circle', value: 'circle' },
+									{ label: 'Dot', value: 'dot' },
 								] }
 								onChange={ ( value ) =>
 									setAttributes( { markerStyle: value } )

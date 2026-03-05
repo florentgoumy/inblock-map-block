@@ -4,7 +4,7 @@
  * Description:       Gutenberg block to display an OpenStreetMap and plot items from a selected post type.
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Version:           0.1.11
+ * Version:           0.1.12
  * Author:            Inblock
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -93,6 +93,17 @@ function inblock_map_block_render( $attributes ) {
 	$marker_style     = isset( $attributes['markerStyle'] ) ? (string) $attributes['markerStyle'] : 'default';
 	$marker_color     = isset( $attributes['markerColor'] ) ? (string) $attributes['markerColor'] : '#2563eb';
 	$base_map         = isset( $attributes['baseMap'] ) ? (string) $attributes['baseMap'] : 'osm';
+	$custom_base_map_enabled = ! empty( $attributes['customBaseMapEnabled'] );
+	$custom_base_map_url = isset( $attributes['customBaseMapUrl'] ) ? (string) $attributes['customBaseMapUrl'] : '';
+	$custom_base_map_attribution = isset( $attributes['customBaseMapAttribution'] ) ? (string) $attributes['customBaseMapAttribution'] : '';
+	$markers_cluster = isset( $attributes['markersCluster'] ) ? (bool) $attributes['markersCluster'] : true;
+	$markers_cluster_disable_at_zoom = isset( $attributes['markersClusterDisableAtZoom'] ) ? (int) $attributes['markersClusterDisableAtZoom'] : 18;
+	$custom_marker_enabled = ! empty( $attributes['customMarkerEnabled'] );
+	$custom_marker_url = isset( $attributes['customMarkerUrl'] ) ? (string) $attributes['customMarkerUrl'] : '';
+	$custom_marker_width = isset( $attributes['customMarkerWidth'] ) ? (int) $attributes['customMarkerWidth'] : 32;
+	$custom_marker_height = isset( $attributes['customMarkerHeight'] ) ? (int) $attributes['customMarkerHeight'] : 32;
+	$custom_marker_anchor_x = isset( $attributes['customMarkerAnchorX'] ) ? (int) $attributes['customMarkerAnchorX'] : 16;
+	$custom_marker_anchor_y = isset( $attributes['customMarkerAnchorY'] ) ? (int) $attributes['customMarkerAnchorY'] : 32;
 
 	// Basic clamping (safety).
 	$lat  = max( -90.0, min( 90.0, $lat ) );
@@ -174,7 +185,7 @@ function inblock_map_block_render( $attributes ) {
 	}
 
 	$attrs = sprintf(
-		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d" data-markers-popup="%d" data-markers-enabled="%d" data-markers-auto-fit="%d" data-marker-style="%s"  data-marker-color="%s" data-base-map="%s"',
+		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d" data-markers-popup="%d" data-markers-enabled="%d" data-markers-auto-fit="%d" data-marker-style="%s"  data-marker-color="%s" data-base-map="%s" data-custom-base-map-enabled="%d" data-custom-base-map-url="%s" data-custom-base-map-attribution="%s" data-markers-cluster="%d" data-markers-cluster-disable-at-zoom="%d" data-custom-marker-enabled="%d" data-custom-marker-url="%s" data-custom-marker-width="%d" data-custom-marker-height="%d" data-custom-marker-anchor-x="%d" data-custom-marker-anchor-y="%d"',
 		esc_attr( $lat ),
 		esc_attr( $lng ),
 		$zoom,

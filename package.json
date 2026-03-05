@@ -1,6 +1,6 @@
 {
 	"name": "inblock-map-block",
-	"version": "0.1.11",
+	"version": "0.1.12",
 	"private": true,
 	"description": "Gutenberg block to display an OpenStreetMap and plot items from a selected post type.",
 	"license": "GPL-2.0-or-later",
@@ -14,6 +14,7 @@
 		"@wordpress/scripts": "^30.12.0"
 	},
 	"dependencies": {
-		"leaflet": "^1.9.4"
+		"leaflet": "^1.9.4",
+		"leaflet.markercluster": "^1.5.3"
 	}
 }

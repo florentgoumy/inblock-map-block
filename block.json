@@ -78,6 +78,58 @@
 		"showStartPosition": {
 			"type": "boolean",
 			"default": false
+		},
+		"markersCluster": {
+			"type": "boolean",
+			"default": true
+		},
+		"markersClusterMaxZoom": {
+			"type": "number",
+			"default": 17
+		},
+		"markersClusterDisableAtZoom": {
+			"type": "number",
+			"default": 18
+		},
+		"customBaseMapEnabled": {
+			"type": "boolean",
+			"default": false
+		},
+		"customBaseMapUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"customBaseMapAttribution": {
+			"type": "string",
+			"default": ""
+		},
+		"markerDotSize": {
+			"type": "number",
+			"default": 6
+		},
+		"customMarkerEnabled": {
+			"type": "boolean",
+			"default": false
+		},
+		"customMarkerUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"customMarkerWidth": {
+			"type": "number",
+			"default": 32
+		},
+		"customMarkerHeight": {
+			"type": "number",
+			"default": 32
+		},
+		"customMarkerAnchorX": {
+			"type": "number",
+			"default": 16
+		},
+		"customMarkerAnchorY": {
+			"type": "number",
+			"default": 32
 		}
 	},
 	"editorScript": "file:./build/index.js",
