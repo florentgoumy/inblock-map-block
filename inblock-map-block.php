@@ -4,7 +4,7 @@
  * Description:       Gutenberg block to display an OpenStreetMap and plot items from a selected post type.
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Version:           0.1.12
+ * Version:           0.1.13
  * Author:            Inblock
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -195,7 +195,18 @@ function inblock_map_block_render( $attributes ) {
 		$markers_autofit ? 1 : 0,
 		esc_attr( $marker_style ),
 		esc_attr( $marker_color ),
-		esc_attr( $base_map )
+		esc_attr( $base_map ),
+		$custom_base_map_enabled ? 1 : 0,
+		esc_attr( $custom_base_map_url ),
+		esc_attr( $custom_base_map_attribution ),
+		$markers_cluster ? 1 : 0,
+		$markers_cluster_disable_at_zoom,
+		$custom_marker_enabled ? 1 : 0,
+		esc_attr( $custom_marker_url ),
+		$custom_marker_width,
+		$custom_marker_height,
+		$custom_marker_anchor_x,
+		$custom_marker_anchor_y
 	);
 
 	$markers_json = wp_json_encode( $markers );
