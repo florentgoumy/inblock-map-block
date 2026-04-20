@@ -15,7 +15,7 @@
 			"style": true,
 			"width": true
 		},
-		"shadow": true
+		"__experimentalShadow": true
 	},
 	"attributes": {
 		"lat": {
