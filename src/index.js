@@ -7,6 +7,15 @@ registerBlockType( 'inblock/map-block', {
 	title: 'Inblock Map Block',
 	icon: 'location',
 	category: 'widgets',
+	supports: {
+		border: {
+			color: true,
+			radius: true,
+			style: true,
+			width: true,
+		},
+		__experimentalShadow: true,
+	},
 	edit: Edit,
 	save: () => null,
 } );
