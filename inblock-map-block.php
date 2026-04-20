@@ -56,7 +56,7 @@ function inblock_map_block_register_block() {
 		true
 	);
 
-	$registration_args = array(
+$registration_args = array(
 		'editor_script'   => 'inblock-map-block-editor',
 		'style'           => 'inblock-map-block-style',
 		'view_script'     => 'inblock-map-block-view',
