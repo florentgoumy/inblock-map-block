@@ -220,5 +220,15 @@ function inblock_map_block_render( $attributes ) {
 		$markers_html = '<script type="application/json" class="inblock-map-block__markers">' . $markers_json . '</script>';
 	}
 
-	return '<div class="wp-block-inblock-map-block"><div class="inblock-map-block__map" ' . $attrs . '></div>' . $markers_html . '</div>';
+	if ( function_exists( 'get_block_wrapper_attributes' ) ) {
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => 'wp-block-inblock-map-block',
+			)
+		);
+	} else {
+		$wrapper_attributes = 'class="wp-block-inblock-map-block"';
+	}
+
+	return '<div ' . $wrapper_attributes . '><div class="inblock-map-block__map" ' . $attrs . '></div>' . $markers_html . '</div>';
 }
