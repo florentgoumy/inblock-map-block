@@ -56,15 +56,45 @@ function inblock_map_block_register_block() {
 		true
 	);
 
-	register_block_type(
-		__DIR__ . '/block.json',
-		array(
-			'editor_script'   => 'inblock-map-block-editor',
-			'style'           => 'inblock-map-block-style',
-			'view_script'     => 'inblock-map-block-view',
-			'render_callback' => 'inblock_map_block_render',
-		)
+$registration_args = array(
+		'editor_script'   => 'inblock-map-block-editor',
+		'style'           => 'inblock-map-block-style',
+		'view_script'     => 'inblock-map-block-view',
+		'render_callback' => 'inblock_map_block_render',
 	);
+
+	$registered = register_block_type( __DIR__ . '/block.json', $registration_args );
+
+	// Compatibility fallback: if metadata registration fails, register the block manually.
+	if ( ! $registered || is_wp_error( $registered ) ) {
+		$supports = array(
+			'html'   => false,
+			'border' => array(
+				'color'  => true,
+				'radius' => true,
+				'style'  => true,
+				'width'  => true,
+			),
+		);
+
+		if ( version_compare( get_bloginfo( 'version' ), '6.5', '>=' ) ) {
+			$supports['shadow'] = true;
+		}
+
+		register_block_type(
+			'inblock/map-block',
+			array_merge(
+				$registration_args,
+				array(
+					'api_version' => 2,
+					'title'       => __( 'Inblock Map Block', 'inblock-map-block' ),
+					'category'    => 'widgets',
+					'icon'        => 'location',
+					'supports'    => $supports,
+				)
+			)
+		);
+	}
 }
 add_action( 'init', 'inblock_map_block_register_block' );
 
