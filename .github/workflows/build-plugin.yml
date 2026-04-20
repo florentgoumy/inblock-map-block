@@ -1,0 +1,40 @@
+name: Build WordPress Plugin
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      PLUGIN_SLUG: inblock-map-block
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Prepare build directory
+        run: |
+          rm -rf build
+          mkdir -p "build/${PLUGIN_SLUG}"
+
+      - name: Copy plugin files
+        run: |
+          rsync -av ./ "build/${PLUGIN_SLUG}/" \
+            --exclude=".git/" \
+            --exclude=".github/" \
+            --exclude=".gitignore" \
+            --exclude="node_modules/" \
+            --exclude="wp-org-assets/" \
+            --exclude="build/" \
+            --exclude=".DS_Store"
+
+      - name: Upload installable plugin archive
+        uses: actions/upload-artifact@v5
+        with:
+          name: inblock-map-block
+          path: build/inblock-map-block/
