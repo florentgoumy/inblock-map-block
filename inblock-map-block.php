@@ -26,11 +26,21 @@ function inblock_map_block_register_block() {
 		return;
 	}
 	$asset = require $asset_file;
+	$editor_dependencies = isset( $asset['dependencies'] ) && is_array( $asset['dependencies'] )
+		? $asset['dependencies']
+		: array();
+
+	// WordPress versions prior to the React JSX runtime handle should still load the block editor script.
+	if ( ! wp_script_is( 'react-jsx-runtime', 'registered' ) ) {
+		$editor_dependencies = array_values(
+			array_diff( $editor_dependencies, array( 'react-jsx-runtime' ) )
+		);
+	}
 
 	wp_register_script(
 		'inblock-map-block-editor',
 		plugins_url( 'build/index.js', __FILE__ ),
-		$asset['dependencies'],
+		$editor_dependencies,
 		$asset['version'],
 		true
 	);
