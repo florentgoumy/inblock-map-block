@@ -86,7 +86,7 @@ $registration_args = array(
 			array_merge(
 				$registration_args,
 				array(
-					'api_version' => 2,
+					'api_version' => 3,
 					'title'       => __( 'Inblock Map Block', 'inblock-map-block' ),
 					'category'    => 'widgets',
 					'icon'        => 'location',
