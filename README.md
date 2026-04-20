@@ -1,23 +1,22 @@
-# inblock-map-block
+# Inblock Map Block
 
-Gutenberg block that renders an OpenStreetMap map (Leaflet) on the front-end, with simple settings for latitude / longitude / zoom.
+Contributors: inblock  
+Tags: block, gutenberg, map, openstreetmap, leaflet  
+Requires at least: 6.0  
+Tested up to: 7.0  
+Requires PHP: 7.4  
+Stable tag: 0.1.13  
+License: GPLv2 or later  
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-## V1 scope
+Gutenberg block that renders an OpenStreetMap map (Leaflet) on the front-end, with optional marker settings.
 
-### What V1 does
+## Description
 
 - Adds a Gutenberg block **Inblock Map Block**.
-- Block attributes:
-  - `lat` (number)
-  - `lng` (number)
-  - `zoom` (number)
-- Editor: shows a Leaflet preview of the map.
-- Front-end: renders the map via **Leaflet** (script loaded through the block `viewScript`).
-
-### What V1 does NOT do (yet)
-
-- **Post type markers**: plotting markers/items from a selected post type is **out of scope for V1** for now.
-- Any dynamic query / marker clustering / filters.
+- Provides map controls for center, zoom, and height.
+- Supports optional marker display from configured content sources.
+- Front-end rendering is handled via Leaflet.
 
 ## Usage
 
@@ -33,13 +32,7 @@ npm run build
 - Copy the plugin folder to `wp-content/plugins/inblock-map-block/`
 - Activate **Inblock Map Block** in WP admin.
 
-3. Add the block in a post/page, then adjust:
-
-- Latitude
-- Longitude
-- Zoom
-
-The front-end map is initialized from the rendered HTML `data-*` attributes (`data-lat`, `data-lng`, `data-zoom`).
+3. Add the block in a post/page and configure map settings.
 
 ## Development
 
@@ -47,7 +40,3 @@ The front-end map is initialized from the rendered HTML `data-*` attributes (`da
 npm run lint:js
 npm run build
 ```
-
-## Versioning
-
-Current version: **0.1.0** (V1 feature scope as defined above).
