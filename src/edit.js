@@ -335,6 +335,34 @@ export default function Edit( { attributes, setAttributes } ) {
 						}
 					/>
 
+					<ToggleControl
+						label={ __( 'Custom tile provider', 'inblock-map-block' ) }
+						checked={ !! customBaseMapEnabled }
+						onChange={ ( value ) =>
+							setAttributes( { customBaseMapEnabled: !! value } )
+						}
+					/>
+
+					{ customBaseMapEnabled && (
+						<>
+							<TextControl
+								label={ __( 'Tile URL', 'inblock-map-block' ) }
+								helperText="https://{s}.example.com/{z}/{x}/{y}.png"
+								value={ customBaseMapUrl }
+								onChange={ ( value ) =>
+									setAttributes( { customBaseMapUrl: value } )
+								}
+							/>
+							<TextControl
+								label={ __( 'Attribution', 'inblock-map-block' ) }
+								value={ customBaseMapAttribution }
+								onChange={ ( value ) =>
+									setAttributes( { customBaseMapAttribution: value } )
+								}
+							/>
+						</>
+					) }
+
 					<p>
 						{ __(
 							'Déplacez la carte et zoomez pour définir la vue par défaut.',
@@ -538,6 +566,26 @@ export default function Edit( { attributes, setAttributes } ) {
 								}
 							/>
 
+							<ToggleControl
+								label={ __( 'Cluster markers', 'inblock-map-block' ) }
+								checked={ !! markersCluster }
+								onChange={ ( value ) =>
+									setAttributes( { markersCluster: !! value } )
+								}
+							/>
+
+							{ markersCluster && (
+								<RangeControl
+									label={ __( 'Disable clustering at zoom', 'inblock-map-block' ) }
+									value={ markersClusterDisableAtZoom }
+									onChange={ ( value ) =>
+										setAttributes( { markersClusterDisableAtZoom: value } )
+									}
+									min={ 2 }
+									max={ 19 }
+								/>
+							) }
+
 							<SelectControl
 								label={ __(
 									'Marker style',
@@ -553,6 +601,47 @@ export default function Edit( { attributes, setAttributes } ) {
 									setAttributes( { markerStyle: value } )
 								}
 							/>
+
+							{ markerStyle === 'default' && (
+								<>
+									<ToggleControl
+										label={ __( 'Custom marker image', 'inblock-map-block' ) }
+										checked={ !! customMarkerEnabled }
+										onChange={ ( value ) =>
+											setAttributes( { customMarkerEnabled: !! value } )
+										}
+									/>
+									{ customMarkerEnabled && (
+										<>
+											<TextControl
+												label={ __( 'Marker image URL', 'inblock-map-block' ) }
+												value={ customMarkerUrl }
+												onChange={ ( value ) =>
+													setAttributes( { customMarkerUrl: value } )
+												}
+											/>
+											<RangeControl
+												label={ __( 'Marker width', 'inblock-map-block' ) }
+												value={ customMarkerWidth }
+												onChange={ ( value ) =>
+													setAttributes( { customMarkerWidth: value } )
+												}
+												min={ 8 }
+												max={ 128 }
+											/>
+											<RangeControl
+												label={ __( 'Marker height', 'inblock-map-block' ) }
+												value={ customMarkerHeight }
+												onChange={ ( value ) =>
+													setAttributes( { customMarkerHeight: value } )
+												}
+												min={ 8 }
+												max={ 128 }
+											/>
+										</>
+									) }
+								</>
+							) }
 
 							{ markerStyle === 'circle' && (
 								<ColorPalette
