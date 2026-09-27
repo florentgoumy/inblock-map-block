@@ -1,42 +1,78 @@
 # Inblock Map Block
 
-Contributors: inblock  
-Tags: block, gutenberg, map, openstreetmap, leaflet  
-Requires at least: 6.0  
-Tested up to: 7.0  
-Requires PHP: 7.4  
-Stable tag: 0.1.13  
-License: GPLv2 or later  
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Lightweight Gutenberg map block for dynamic WordPress content.
 
-Gutenberg block that renders an OpenStreetMap map (Leaflet) on the front-end, with optional marker settings.
+Inblock Map Block lets you display WordPress content on OpenStreetMap/CARTO maps directly from the block editor. It is designed for directories, locations, events, real estate, stores, projects, and other content-driven WordPress sites.
 
-## Description
+## Free
 
-- Adds a Gutenberg block **Inblock Map Block**.
-- Provides map controls for center, zoom, and height.
-- Supports optional marker display from configured content sources.
-- Front-end rendering is handled via Leaflet.
+The Free edition includes:
 
-## Usage
+- Native Gutenberg block.
+- OpenStreetMap, CARTO Positron, and CARTO Dark basemaps.
+- Custom tile provider support.
+- Dynamic markers from a selected post type.
+- ACF Location fields.
+- ACF text latitude/longitude fields.
+- Post meta latitude/longitude fields.
+- Marker clustering.
+- Auto-fit to markers.
+- Default, circle, dot, and custom image markers.
+- Basic title + link popups.
+- Gutenberg border and shadow controls.
 
-1. Build assets:
+## Pro
 
-```bash
-npm install
-npm run build
-```
+Inblock Map Block Pro builds on the Free edition with content-oriented mapping features:
 
-2. Install in WordPress:
+- Advanced content filtering by taxonomy.
+- Advanced filtering by custom fields/post meta.
+- Result ordering.
+- Rich popups with featured images.
+- Rich popups with excerpts.
+- Selected custom fields in popups.
+- Conditional marker colors based on taxonomy terms.
 
-- Copy the plugin folder to `wp-content/plugins/inblock-map-block/`
-- Activate **Inblock Map Block** in WP admin.
-
-3. Add the block in a post/page and configure map settings.
+Future Pro releases are planned around search, front-end filters, synchronized results lists, and richer content-driven map interfaces.
 
 ## Development
 
+Install dependencies:
+
 ```bash
-npm run lint:js
+npm ci
+composer install
+```
+
+Build assets:
+
+```bash
 npm run build
 ```
+
+Lint JavaScript:
+
+```bash
+npm run lint:js
+```
+
+## Freemius development mode
+
+The plugin uses the Freemius WordPress SDK through Composer. Never commit the product secret key.
+
+For local integration testing, define the Freemius development constants only in the local WordPress site's `wp-config.php`.
+
+## Release model
+
+This repository is the single source for both editions.
+
+Freemius generates:
+
+- the WordPress.org-compatible Free package;
+- the licensed Pro package.
+
+Premium code uses Freemius `__premium_only` conventions and is removed from the generated Free package.
+
+## License
+
+GPL-2.0-or-later.
