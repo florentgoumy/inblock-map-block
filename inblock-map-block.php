@@ -9,6 +9,8 @@
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       inblock-map-block
+ *
+ * @fs_ignore /vendor/
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -16,8 +18,56 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'INBLOCK_MAP_BLOCK_VERSION', '0.2.0' );
+define( 'INBLOCK_MAP_BLOCK_FILE', __FILE__ );
+
+$inblock_map_block_autoload = __DIR__ . '/vendor/autoload.php';
+if ( file_exists( $inblock_map_block_autoload ) ) {
+	require_once $inblock_map_block_autoload;
+}
+
+if ( function_exists( 'fs_dynamic_init' ) && ! function_exists( 'imb_fs' ) ) {
+	/**
+	 * Returns the Freemius SDK instance for Inblock Map Block.
+	 *
+	 * @return Freemius
+	 */
+	function imb_fs() {
+		global $imb_fs;
+
+		if ( ! isset( $imb_fs ) ) {
+			$imb_fs = fs_dynamic_init(
+				array(
+					'id'               => '40192',
+					'slug'             => 'inblock-map-block',
+					'type'             => 'plugin',
+					'public_key'       => 'pk_5910ba94d34f62948ba4a4fbbdb5a',
+					'is_premium'       => false,
+					'has_addons'       => false,
+					'has_paid_plans'   => false,
+					'is_org_compliant' => true,
+					'menu'             => array(
+						'first-path' => 'plugins.php',
+						'account'    => false,
+						'support'    => false,
+					),
+				)
+			);
+		}
+
+		return $imb_fs;
+	}
+
+	imb_fs();
+	do_action( 'imb_fs_loaded' );
+}
 
 require_once __DIR__ . '/includes/rest.php';
+
+if ( function_exists( 'imb_fs' ) ) {
+	if ( imb_fs()->can_use_premium_code__premium_only() ) {
+		require_once __DIR__ . '/includes/pro__premium_only.php';
+	}
+}
 
 /**
  * Registers the block assets and the block type.
@@ -38,6 +88,11 @@ function inblock_map_block_register_block() {
 			array_diff( $editor_dependencies, array( 'react-jsx-runtime' ) )
 		);
 	}
+
+	$editor_dependencies = apply_filters(
+		'inblock_map_block_editor_dependencies',
+		$editor_dependencies
+	);
 
 	wp_register_script(
 		'inblock-map-block-editor',
@@ -60,10 +115,19 @@ function inblock_map_block_register_block() {
 		'version'      => $asset['version'],
 	);
 
+	$view_dependencies = isset( $view_asset['dependencies'] ) && is_array( $view_asset['dependencies'] )
+		? $view_asset['dependencies']
+		: array();
+
+	$view_dependencies = apply_filters(
+		'inblock_map_block_view_dependencies',
+		$view_dependencies
+	);
+
 	wp_register_script(
 		'inblock-map-block-view',
 		plugins_url( 'build/view.js', __FILE__ ),
-		isset( $view_asset['dependencies'] ) ? $view_asset['dependencies'] : array(),
+		$view_dependencies,
 		isset( $view_asset['version'] ) ? $view_asset['version'] : $asset['version'],
 		true
 	);
