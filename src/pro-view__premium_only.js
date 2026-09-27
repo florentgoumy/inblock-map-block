@@ -25,7 +25,10 @@ document.addEventListener( 'inblock-map-block:before-popup', ( event ) => {
 	const marker = detail.marker;
 	const point = detail.point || {};
 
-	if ( ! marker || ( ! point.proImage && ! point.proExcerpt && ! point.proMeta ) ) {
+	if (
+		! marker ||
+		( ! point.proImage && ! point.proExcerpt && ! point.proMeta )
+	) {
 		return;
 	}
 
