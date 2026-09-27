@@ -9,6 +9,69 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+
+/**
+ * Registers premium editor and front-end assets.
+ */
+function inblock_map_block_pro_register_assets__premium_only() {
+	$editor_asset_file = plugin_dir_path( INBLOCK_MAP_BLOCK_FILE ) . 'build/pro-edit__premium_only.asset.php';
+	$editor_asset = file_exists( $editor_asset_file )
+		? require $editor_asset_file
+		: array(
+			'dependencies' => array(),
+			'version'      => INBLOCK_MAP_BLOCK_VERSION,
+		);
+
+	wp_register_script(
+		'inblock-map-block-pro-editor',
+		plugins_url( 'build/pro-edit__premium_only.js', INBLOCK_MAP_BLOCK_FILE ),
+		isset( $editor_asset['dependencies'] ) ? $editor_asset['dependencies'] : array(),
+		isset( $editor_asset['version'] ) ? $editor_asset['version'] : INBLOCK_MAP_BLOCK_VERSION,
+		true
+	);
+
+	$view_asset_file = plugin_dir_path( INBLOCK_MAP_BLOCK_FILE ) . 'build/pro-view__premium_only.asset.php';
+	$view_asset = file_exists( $view_asset_file )
+		? require $view_asset_file
+		: array(
+			'dependencies' => array(),
+			'version'      => INBLOCK_MAP_BLOCK_VERSION,
+		);
+
+	wp_register_script(
+		'inblock-map-block-pro-view',
+		plugins_url( 'build/pro-view__premium_only.js', INBLOCK_MAP_BLOCK_FILE ),
+		isset( $view_asset['dependencies'] ) ? $view_asset['dependencies'] : array(),
+		isset( $view_asset['version'] ) ? $view_asset['version'] : INBLOCK_MAP_BLOCK_VERSION,
+		true
+	);
+}
+add_action( 'init', 'inblock_map_block_pro_register_assets__premium_only', 5 );
+
+/**
+ * Loads premium editor code before the core editor bundle.
+ *
+ * @param array $dependencies Core editor dependencies.
+ * @return array
+ */
+function inblock_map_block_pro_editor_dependencies__premium_only( $dependencies ) {
+	$dependencies[] = 'inblock-map-block-pro-editor';
+	return array_values( array_unique( $dependencies ) );
+}
+add_filter( 'inblock_map_block_editor_dependencies', 'inblock_map_block_pro_editor_dependencies__premium_only' );
+
+/**
+ * Loads premium front-end code before the core view bundle.
+ *
+ * @param array $dependencies Core view dependencies.
+ * @return array
+ */
+function inblock_map_block_pro_view_dependencies__premium_only( $dependencies ) {
+	$dependencies[] = 'inblock-map-block-pro-view';
+	return array_values( array_unique( $dependencies ) );
+}
+add_filter( 'inblock_map_block_view_dependencies', 'inblock_map_block_pro_view_dependencies__premium_only' );
+
 /**
  * Adds premium-only block attributes on the server.
  *
