@@ -50,4 +50,8 @@ wp-config.php
 # JS
 node_modules/
 
+# PHP dependencies and release artifacts
+/vendor/
+/dist/
+
 .git-credentials
