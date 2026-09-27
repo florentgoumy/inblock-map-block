@@ -149,7 +149,25 @@ function initMap( root ) {
 
 		const marker = createMarker( root, markerStyle, markerColor, m );
 
+		root.dispatchEvent(
+			new CustomEvent( 'inblock-map-block:marker-created', {
+				bubbles: true,
+				detail: { root, marker, point: m },
+			} )
+		);
+
 		if ( markersPopup ) {
+			root.dispatchEvent(
+				new CustomEvent( 'inblock-map-block:before-popup', {
+					bubbles: true,
+					detail: { root, marker, point: m },
+				} )
+			);
+
+			if ( marker.getPopup() ) {
+				layer.addLayer( marker );
+				return;
+			}
 			const title = escapeHtml( m.title || '' );
 			const url = escapeHtml( m.url || '' );
 			const html =
