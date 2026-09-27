@@ -56,43 +56,86 @@ const withPremiumControls = createHigherOrderComponent(
 				<BlockEdit { ...props } />
 				<InspectorControls>
 					<PanelBody
-						title={ __( 'Advanced data · Pro', 'inblock-map-block' ) }
+						title={ __(
+							'Advanced data · Pro',
+							'inblock-map-block'
+						) }
 						initialOpen={ false }
 					>
 						<TextControl
 							label={ __( 'Taxonomy', 'inblock-map-block' ) }
-							help={ __( 'Example: category, location_type', 'inblock-map-block' ) }
+							help={ __(
+								'Example: category, location_type',
+								'inblock-map-block'
+							) }
 							value={ attributes.proTaxonomy || '' }
-							onChange={ ( value ) => setAttributes( { proTaxonomy: value } ) }
+							onChange={ ( value ) =>
+								setAttributes( { proTaxonomy: value } )
+							}
 						/>
 						<TextControl
 							label={ __( 'Term slug', 'inblock-map-block' ) }
-							help={ __( 'Only display posts assigned to this term.', 'inblock-map-block' ) }
+							help={ __(
+								'Only display posts assigned to this term.',
+								'inblock-map-block'
+							) }
 							value={ attributes.proTerm || '' }
-							onChange={ ( value ) => setAttributes( { proTerm: value } ) }
+							onChange={ ( value ) =>
+								setAttributes( { proTerm: value } )
+							}
 						/>
 						<TextControl
 							label={ __( 'Meta key', 'inblock-map-block' ) }
 							value={ attributes.proMetaKey || '' }
-							onChange={ ( value ) => setAttributes( { proMetaKey: value } ) }
+							onChange={ ( value ) =>
+								setAttributes( { proMetaKey: value } )
+							}
 						/>
 						<TextControl
 							label={ __( 'Meta value', 'inblock-map-block' ) }
-							help={ __( 'Leave empty to only require the meta key.', 'inblock-map-block' ) }
+							help={ __(
+								'Leave empty to only require the meta key.',
+								'inblock-map-block'
+							) }
 							value={ attributes.proMetaValue || '' }
-							onChange={ ( value ) => setAttributes( { proMetaValue: value } ) }
+							onChange={ ( value ) =>
+								setAttributes( { proMetaValue: value } )
+							}
 						/>
 						<SelectControl
 							label={ __( 'Order by', 'inblock-map-block' ) }
 							value={ attributes.proOrderBy || 'date' }
 							options={ [
-								{ label: __( 'Date', 'inblock-map-block' ), value: 'date' },
-								{ label: __( 'Title', 'inblock-map-block' ), value: 'title' },
-								{ label: __( 'Menu order', 'inblock-map-block' ), value: 'menu_order' },
-								{ label: __( 'Modified date', 'inblock-map-block' ), value: 'modified' },
-								{ label: __( 'Random', 'inblock-map-block' ), value: 'rand' },
+								{
+									label: __( 'Date', 'inblock-map-block' ),
+									value: 'date',
+								},
+								{
+									label: __( 'Title', 'inblock-map-block' ),
+									value: 'title',
+								},
+								{
+									label: __(
+										'Menu order',
+										'inblock-map-block'
+									),
+									value: 'menu_order',
+								},
+								{
+									label: __(
+										'Modified date',
+										'inblock-map-block'
+									),
+									value: 'modified',
+								},
+								{
+									label: __( 'Random', 'inblock-map-block' ),
+									value: 'rand',
+								},
 							] }
-							onChange={ ( value ) => setAttributes( { proOrderBy: value } ) }
+							onChange={ ( value ) =>
+								setAttributes( { proOrderBy: value } )
+							}
 						/>
 						<SelectControl
 							label={ __( 'Order', 'inblock-map-block' ) }
@@ -101,7 +144,9 @@ const withPremiumControls = createHigherOrderComponent(
 								{ label: 'Descending', value: 'DESC' },
 								{ label: 'Ascending', value: 'ASC' },
 							] }
-							onChange={ ( value ) => setAttributes( { proOrder: value } ) }
+							onChange={ ( value ) =>
+								setAttributes( { proOrder: value } )
+							}
 						/>
 					</PanelBody>
 
@@ -110,33 +155,53 @@ const withPremiumControls = createHigherOrderComponent(
 						initialOpen={ false }
 					>
 						<ToggleControl
-							label={ __( 'Featured image', 'inblock-map-block' ) }
+							label={ __(
+								'Featured image',
+								'inblock-map-block'
+							) }
 							checked={ !! attributes.proPopupImage }
-							onChange={ ( value ) => setAttributes( { proPopupImage: !! value } ) }
+							onChange={ ( value ) =>
+								setAttributes( { proPopupImage: !! value } )
+							}
 						/>
 						<ToggleControl
 							label={ __( 'Excerpt', 'inblock-map-block' ) }
 							checked={ !! attributes.proPopupExcerpt }
-							onChange={ ( value ) => setAttributes( { proPopupExcerpt: !! value } ) }
+							onChange={ ( value ) =>
+								setAttributes( { proPopupExcerpt: !! value } )
+							}
 						/>
 						<TextControl
 							label={ __( 'Custom fields', 'inblock-map-block' ) }
-							help={ __( 'Comma-separated post meta keys.', 'inblock-map-block' ) }
+							help={ __(
+								'Comma-separated post meta keys.',
+								'inblock-map-block'
+							) }
 							value={ attributes.proPopupMetaKeys || '' }
-							onChange={ ( value ) => setAttributes( { proPopupMetaKeys: value } ) }
+							onChange={ ( value ) =>
+								setAttributes( { proPopupMetaKeys: value } )
+							}
 						/>
 					</PanelBody>
 
 					<PanelBody
-						title={ __( 'Conditional markers · Pro', 'inblock-map-block' ) }
+						title={ __(
+							'Conditional markers · Pro',
+							'inblock-map-block'
+						) }
 						initialOpen={ false }
 					>
 						<TextControl
 							label={ __( 'Taxonomy', 'inblock-map-block' ) }
-							help={ __( 'Choose the taxonomy used to color markers.', 'inblock-map-block' ) }
+							help={ __(
+								'Choose the taxonomy used to color markers.',
+								'inblock-map-block'
+							) }
 							value={ attributes.proMarkerColorTaxonomy || '' }
 							onChange={ ( value ) =>
-								setAttributes( { proMarkerColorTaxonomy: value } )
+								setAttributes( {
+									proMarkerColorTaxonomy: value,
+								} )
 							}
 						/>
 						<TextareaControl
