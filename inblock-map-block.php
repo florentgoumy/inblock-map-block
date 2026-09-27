@@ -1,10 +1,10 @@
 <?php
 /**
  * Plugin Name:       Inblock Map Block
- * Description:       Gutenberg block to display an OpenStreetMap and plot items from a selected post type.
+ * Description:       Lightweight Gutenberg map block for dynamic WordPress content.
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Version:           0.1.13
+ * Version:           0.2.0
  * Author:            Inblock
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -14,6 +14,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+define( 'INBLOCK_MAP_BLOCK_VERSION', '0.2.0' );
 
 require_once __DIR__ . '/includes/rest.php';
 
@@ -25,12 +27,12 @@ function inblock_map_block_register_block() {
 	if ( ! file_exists( $asset_file ) ) {
 		return;
 	}
+
 	$asset = require $asset_file;
 	$editor_dependencies = isset( $asset['dependencies'] ) && is_array( $asset['dependencies'] )
 		? $asset['dependencies']
 		: array();
 
-	// WordPress versions prior to the React JSX runtime handle should still load the block editor script.
 	if ( ! wp_script_is( 'react-jsx-runtime', 'registered' ) ) {
 		$editor_dependencies = array_values(
 			array_diff( $editor_dependencies, array( 'react-jsx-runtime' ) )
@@ -66,7 +68,7 @@ function inblock_map_block_register_block() {
 		true
 	);
 
-$registration_args = array(
+	$registration_args = array(
 		'editor_script'   => 'inblock-map-block-editor',
 		'style'           => 'inblock-map-block-style',
 		'view_script'     => 'inblock-map-block-view',
@@ -75,7 +77,6 @@ $registration_args = array(
 
 	$registered = register_block_type( __DIR__ . '/block.json', $registration_args );
 
-	// Compatibility fallback: if metadata registration fails, register the block manually.
 	if ( ! $registered || is_wp_error( $registered ) ) {
 		$supports = array(
 			'html'   => false,
@@ -109,16 +110,74 @@ $registration_args = array(
 add_action( 'init', 'inblock_map_block_register_block' );
 
 /**
+ * Reads coordinates for a post from the configured marker source.
+ *
+ * @param int    $post_id        Post ID.
+ * @param string $markers_source Marker source.
+ * @param string $acf_field      ACF field name.
+ * @param string $lat_meta_key   Latitude meta key.
+ * @param string $lng_meta_key   Longitude meta key.
+ * @return array|null
+ */
+function inblock_map_block_get_post_coordinates( $post_id, $markers_source, $acf_field, $lat_meta_key, $lng_meta_key ) {
+	$point_lat = null;
+	$point_lng = null;
+
+	if ( 'acf_location' === $markers_source && function_exists( 'get_field' ) ) {
+		$loc = get_field( $acf_field, $post_id );
+		if ( is_array( $loc ) && isset( $loc['lat'], $loc['lng'] ) ) {
+			$point_lat = (float) $loc['lat'];
+			$point_lng = (float) $loc['lng'];
+		}
+	} elseif ( 'acf_text_latlng' === $markers_source && function_exists( 'get_field' ) ) {
+		$raw = get_field( $acf_field, $post_id );
+		if ( is_string( $raw ) ) {
+			$raw   = trim( trim( $raw ), '{}()[]' );
+			$parts = array_map( 'trim', explode( ',', $raw ) );
+
+			if ( count( $parts ) >= 2 ) {
+				$a = (float) $parts[0];
+				$b = (float) $parts[1];
+
+				if ( abs( $a ) > 90 && abs( $b ) <= 90 ) {
+					$point_lat = $b;
+					$point_lng = $a;
+				} else {
+					$point_lat = $a;
+					$point_lng = $b;
+				}
+			}
+		}
+	} elseif ( 'meta_latlng' === $markers_source ) {
+		$meta_lat = get_post_meta( $post_id, $lat_meta_key, true );
+		$meta_lng = get_post_meta( $post_id, $lng_meta_key, true );
+
+		if ( '' !== $meta_lat && '' !== $meta_lng ) {
+			$point_lat = (float) $meta_lat;
+			$point_lng = (float) $meta_lng;
+		}
+	}
+
+	if ( null === $point_lat || null === $point_lng ) {
+		return null;
+	}
+
+	return array(
+		'lat' => max( -90.0, min( 90.0, $point_lat ) ),
+		'lng' => max( -180.0, min( 180.0, $point_lng ) ),
+	);
+}
+
+/**
  * Server-side render for the block.
  *
  * @param array $attributes Block attributes.
  * @return string
  */
 function inblock_map_block_render( $attributes ) {
-	$lat  = isset( $attributes['lat'] ) ? (float) $attributes['lat'] : 0.0;
-	$lng  = isset( $attributes['lng'] ) ? (float) $attributes['lng'] : 0.0;
-	$zoom = isset( $attributes['zoom'] ) ? (int) $attributes['zoom'] : 12;
-
+	$lat    = isset( $attributes['lat'] ) ? (float) $attributes['lat'] : 0.0;
+	$lng    = isset( $attributes['lng'] ) ? (float) $attributes['lng'] : 0.0;
+	$zoom   = isset( $attributes['zoom'] ) ? (int) $attributes['zoom'] : 12;
 	$height = isset( $attributes['height'] ) ? (int) $attributes['height'] : 320;
 
 	$markers_enabled  = ! empty( $attributes['markersEnabled'] );
@@ -133,99 +192,90 @@ function inblock_map_block_render( $attributes ) {
 	$marker_style     = isset( $attributes['markerStyle'] ) ? (string) $attributes['markerStyle'] : 'default';
 	$marker_color     = isset( $attributes['markerColor'] ) ? (string) $attributes['markerColor'] : '#2563eb';
 	$base_map         = isset( $attributes['baseMap'] ) ? (string) $attributes['baseMap'] : 'osm';
-	$custom_base_map_enabled = ! empty( $attributes['customBaseMapEnabled'] );
-	$custom_base_map_url = isset( $attributes['customBaseMapUrl'] ) ? (string) $attributes['customBaseMapUrl'] : '';
+
+	$custom_base_map_enabled     = ! empty( $attributes['customBaseMapEnabled'] );
+	$custom_base_map_url         = isset( $attributes['customBaseMapUrl'] ) ? (string) $attributes['customBaseMapUrl'] : '';
 	$custom_base_map_attribution = isset( $attributes['customBaseMapAttribution'] ) ? (string) $attributes['customBaseMapAttribution'] : '';
-	$markers_cluster = isset( $attributes['markersCluster'] ) ? (bool) $attributes['markersCluster'] : true;
+
+	$markers_cluster                 = isset( $attributes['markersCluster'] ) ? (bool) $attributes['markersCluster'] : true;
 	$markers_cluster_disable_at_zoom = isset( $attributes['markersClusterDisableAtZoom'] ) ? (int) $attributes['markersClusterDisableAtZoom'] : 18;
-	$custom_marker_enabled = ! empty( $attributes['customMarkerEnabled'] );
-	$custom_marker_url = isset( $attributes['customMarkerUrl'] ) ? (string) $attributes['customMarkerUrl'] : '';
-	$custom_marker_width = isset( $attributes['customMarkerWidth'] ) ? (int) $attributes['customMarkerWidth'] : 32;
-	$custom_marker_height = isset( $attributes['customMarkerHeight'] ) ? (int) $attributes['customMarkerHeight'] : 32;
+
+	$custom_marker_enabled  = ! empty( $attributes['customMarkerEnabled'] );
+	$custom_marker_url      = isset( $attributes['customMarkerUrl'] ) ? (string) $attributes['customMarkerUrl'] : '';
+	$custom_marker_width    = isset( $attributes['customMarkerWidth'] ) ? (int) $attributes['customMarkerWidth'] : 32;
+	$custom_marker_height   = isset( $attributes['customMarkerHeight'] ) ? (int) $attributes['customMarkerHeight'] : 32;
 	$custom_marker_anchor_x = isset( $attributes['customMarkerAnchorX'] ) ? (int) $attributes['customMarkerAnchorX'] : 16;
 	$custom_marker_anchor_y = isset( $attributes['customMarkerAnchorY'] ) ? (int) $attributes['customMarkerAnchorY'] : 32;
 
-	// Basic clamping (safety).
-	$lat  = max( -90.0, min( 90.0, $lat ) );
-	$lng  = max( -180.0, min( 180.0, $lng ) );
-	$zoom = max( 1, min( 19, $zoom ) );
-	$height = max( 120, min( 900, $height ) );
-
+	$lat           = max( -90.0, min( 90.0, $lat ) );
+	$lng           = max( -180.0, min( 180.0, $lng ) );
+	$zoom          = max( 1, min( 19, $zoom ) );
+	$height        = max( 120, min( 900, $height ) );
 	$markers_limit = max( 1, min( 500, $markers_limit ) );
 
 	$markers = array();
 
 	if ( $markers_enabled && ! empty( $markers_posttype ) ) {
-		$query = new WP_Query(
-			array(
-				'post_type'      => $markers_posttype,
-				'post_status'    => 'publish',
-				'posts_per_page' => $markers_limit,
-				'no_found_rows'  => true,
-			)
+		$query_args = array(
+			'post_type'      => sanitize_key( $markers_posttype ),
+			'post_status'    => 'publish',
+			'posts_per_page' => $markers_limit,
+			'no_found_rows'  => true,
 		);
+
+		/**
+		 * Filters marker query arguments.
+		 *
+		 * Premium extensions use this hook without adding premium logic to the Free build.
+		 *
+		 * @param array $query_args Query arguments.
+		 * @param array $attributes Block attributes.
+		 */
+		$query_args = apply_filters( 'inblock_map_block_query_args', $query_args, $attributes );
+
+		$query = new WP_Query( $query_args );
 
 		if ( $query->have_posts() ) {
 			while ( $query->have_posts() ) {
 				$query->the_post();
 				$post_id = get_the_ID();
 
-				$point_lat = null;
-				$point_lng = null;
+				$coordinates = inblock_map_block_get_post_coordinates(
+					$post_id,
+					$markers_source,
+					$acf_field,
+					$lat_meta_key,
+					$lng_meta_key
+				);
 
-				if ( 'acf_location' === $markers_source && function_exists( 'get_field' ) ) {
-								$loc = get_field( $acf_field, $post_id );
-								if ( is_array( $loc ) && isset( $loc['lat'], $loc['lng'] ) ) {
-									$point_lat = (float) $loc['lat'];
-									$point_lng = (float) $loc['lng'];
-								}
-							} elseif ( 'acf_text_latlng' === $markers_source && function_exists( 'get_field' ) ) {
-								$raw = get_field( $acf_field, $post_id );
-								if ( is_string( $raw ) ) {
-									$raw = trim( $raw );
-									$raw = trim( $raw, "{}()[]" );
-									$parts = array_map( 'trim', explode( ',', $raw ) );
-									if ( count( $parts ) >= 2 ) {
-										$a = (float) $parts[0];
-										$b = (float) $parts[1];
-										if ( abs( $a ) > 90 && abs( $b ) <= 90 ) {
-											$point_lat = $b;
-											$point_lng = $a;
-										} else {
-											$point_lat = $a;
-											$point_lng = $b;
-										}
-									}
-								}
-							} elseif ( 'meta_latlng' === $markers_source ) {
-								$meta_lat = get_post_meta( $post_id, $lat_meta_key, true );
-								$meta_lng = get_post_meta( $post_id, $lng_meta_key, true );
-								if ( '' !== $meta_lat && '' !== $meta_lng ) {
-									$point_lat = (float) $meta_lat;
-									$point_lng = (float) $meta_lng;
-								}
-							}if ( null === $point_lat || null === $point_lng ) {
+				if ( ! $coordinates ) {
 					continue;
 				}
 
-				// Clamp point.
-				$point_lat = max( -90.0, min( 90.0, $point_lat ) );
-				$point_lng = max( -180.0, min( 180.0, $point_lng ) );
-
-				$markers[] = array(
+				$marker = array(
 					'id'    => $post_id,
 					'title' => get_the_title( $post_id ),
 					'url'   => get_permalink( $post_id ),
-					'lat'   => $point_lat,
-					'lng'   => $point_lng,
+					'lat'   => $coordinates['lat'],
+					'lng'   => $coordinates['lng'],
 				);
+
+				/**
+				 * Filters marker data before it is serialized for the front end.
+				 *
+				 * @param array $marker     Marker data.
+				 * @param int   $post_id    Post ID.
+				 * @param array $attributes Block attributes.
+				 */
+				$markers[] = apply_filters( 'inblock_map_block_marker_data', $marker, $post_id, $attributes );
 			}
+
 			wp_reset_postdata();
 		}
 	}
 
 	$attrs = sprintf(
-		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d" data-markers-popup="%d" data-markers-enabled="%d" data-markers-auto-fit="%d" data-marker-style="%s"  data-marker-color="%s" data-base-map="%s" data-custom-base-map-enabled="%d" data-custom-base-map-url="%s" data-custom-base-map-attribution="%s" data-markers-cluster="%d" data-markers-cluster-disable-at-zoom="%d" data-custom-marker-enabled="%d" data-custom-marker-url="%s" data-custom-marker-width="%d" data-custom-marker-height="%d" data-custom-marker-anchor-x="%d" data-custom-marker-anchor-y="%d"',
+		'data-lat="%s" data-lng="%s" data-zoom="%d" data-height="%d" data-markers-popup="%d" data-markers-enabled="%d" data-markers-auto-fit="%d" data-marker-style="%s" data-marker-color="%s" data-base-map="%s" data-custom-base-map-enabled="%d" data-custom-base-map-url="%s" data-custom-base-map-attribution="%s" data-markers-cluster="%d" data-markers-cluster-disable-at-zoom="%d" data-custom-marker-enabled="%d" data-custom-marker-url="%s" data-custom-marker-width="%d" data-custom-marker-height="%d" data-custom-marker-anchor-x="%d" data-custom-marker-anchor-y="%d"',
 		esc_attr( $lat ),
 		esc_attr( $lng ),
 		$zoom,
@@ -249,13 +299,13 @@ function inblock_map_block_render( $attributes ) {
 		$custom_marker_anchor_y
 	);
 
-	$markers_json = wp_json_encode( $markers );
 	$markers_html = '';
 	if ( $markers_enabled ) {
+		$markers_json = wp_json_encode( $markers );
 		if ( ! is_string( $markers_json ) ) {
 			$markers_json = '[]';
 		}
-		// Prevent accidental script termination inside JSON.
+
 		$markers_json = str_replace( '</script', '<\/script', $markers_json );
 		$markers_html = '<script type="application/json" class="inblock-map-block__markers">' . $markers_json . '</script>';
 	}
