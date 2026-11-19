@@ -2,76 +2,56 @@
 
 Lightweight Gutenberg map block for dynamic WordPress content.
 
-Inblock Map Block lets you display WordPress content on OpenStreetMap/CARTO maps directly from the block editor. It is designed for directories, locations, events, real estate, stores, projects, and other content-driven WordPress sites.
+## Free edition
 
-## Free
+The Free edition is a complete mapping block for ordinary WordPress sites:
 
-The Free edition includes:
+- OpenStreetMap and OpenFreeMap vector basemaps.
+- Single and collection marker modes.
+- ACF Location, text coordinates, ACF Repeater and post-meta sources.
+- Multiple locations per post, clustering and editor previews.
+- Configurable popups with WordPress and ACF fields (up to five).
+- Theme-aware colors, MapBlock color presets and custom colors.
+- Custom XYZ sources and hosted MapLibre style JSON URLs.
+- Border, shadow and responsive block controls.
 
-- Native Gutenberg block.
-- OpenStreetMap, CARTO Positron, and CARTO Dark basemaps.
-- Custom tile provider support.
-- Dynamic markers from a selected post type.
-- ACF Location fields.
-- ACF text latitude/longitude fields.
-- Post meta latitude/longitude fields.
-- Marker clustering.
-- Auto-fit to markers.
-- Default, circle, dot, and custom image markers.
-- Basic title + link popups.
-- Gutenberg border and shadow controls.
+## Pro edition
 
-## Pro
+The licensed Pro package adds content-oriented controls:
 
-Inblock Map Block Pro builds on the Free edition with content-oriented mapping features:
-
-- Advanced content filtering by taxonomy.
-- Advanced filtering by custom fields/post meta.
+- Taxonomy and post-meta filtering.
 - Result ordering.
-- Rich popups with featured images.
-- Rich popups with excerpts.
-- Selected custom fields in popups.
-- Conditional marker colors based on taxonomy terms.
+- Conditional marker colors driven by taxonomy terms.
+- Premium extension bundles and future search/list synchronization features.
 
-Future Pro releases are planned around search, front-end filters, synchronized results lists, and richer content-driven map interfaces.
+The existing premium rich-popup attributes remain supported for compatibility,
+although the Free popup builder now covers most common popup content needs.
 
 ## Development
 
-Install dependencies:
+Install dependencies and build all Free and Pro assets:
 
 ```bash
 npm ci
 composer install
-```
-
-Build assets:
-
-```bash
 npm run build
 ```
 
-Lint JavaScript:
+For local WordPress Playground development:
 
 ```bash
-npm run lint:js
+npm run dev
 ```
 
-## Freemius development mode
+## Freemius release model
 
-The plugin uses the Freemius WordPress SDK through Composer. Never commit the product secret key.
+This repository is the single source for both editions. Freemius product `40192`
+generates the WordPress.org-compatible Free package and the licensed Pro package.
+Premium PHP and JavaScript files use Freemius `__premium_only` naming conventions
+and are removed from the generated Free archive.
 
-For local integration testing, define the Freemius development constants only in the local WordPress site's `wp-config.php`.
-
-## Release model
-
-This repository is the single source for both editions.
-
-Freemius generates:
-
-- the WordPress.org-compatible Free package;
-- the licensed Pro package.
-
-Premium code uses Freemius `__premium_only` conventions and is removed from the generated Free package.
+Never commit the Freemius product secret key. Development-only constants belong
+in the local WordPress `wp-config.php`.
 
 ## License
 

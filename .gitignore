@@ -49,9 +49,12 @@ wp-config.php
 
 # JS
 node_modules/
-
-# PHP dependencies and release artifacts
 /vendor/
-/dist/
+
+# Local development and release artifacts.
+.DS_Store
+dist/
+advanced-custom-fields-pro.zip
+AGENTS.md
 
 .git-credentials

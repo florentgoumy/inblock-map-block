@@ -1,6 +1,6 @@
 === Inblock Map Block ===
 Contributors: inblock
-Tags: block, gutenberg, map, openstreetmap, leaflet
+Tags: block, gutenberg, map, openstreetmap, leaflet, acf
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
@@ -8,84 +8,54 @@ Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A lightweight Gutenberg map block for displaying dynamic WordPress content with OpenStreetMap and Leaflet.
+A flexible Gutenberg map block for WordPress content, ACF fields and multiple locations.
 
 == Description ==
 
-Inblock Map Block adds a native Gutenberg map block built for content-driven WordPress sites.
+Inblock Map Block displays WordPress content on OpenStreetMap and OpenFreeMap maps directly from the block editor.
 
-Display posts, custom post types, locations, events, stores, properties, projects, or other content as markers without relying on Google Maps.
+Free features include:
 
-= Free features =
+* OpenStreetMap and OpenFreeMap vector styles.
+* Single-content and collection marker modes.
+* ACF Location, coordinate text, ACF Repeater and post-meta sources.
+* Multiple locations per post and marker clustering.
+* Live marker and popup previews in Gutenberg.
+* Configurable popup fields from WordPress and ACF.
+* Theme colors, reusable color presets and custom map colors.
+* Custom XYZ and MapLibre JSON map sources.
 
-* Native Gutenberg editing experience.
-* OpenStreetMap, CARTO Positron, and CARTO Dark maps.
-* Custom tile providers.
-* Markers from any public post type.
-* ACF Location support.
-* ACF text latitude/longitude support.
-* Post meta latitude/longitude support.
-* Marker clustering.
-* Auto-fit to markers.
-* Default, circle, dot, and custom image markers.
-* Basic title and link popups.
-* Adjustable map height.
-* Gutenberg border and shadow controls.
-
-= Inblock Map Block Pro =
-
-A commercial Pro edition is available for sites that need richer content-driven maps.
-
-Pro adds:
-
-* Taxonomy-based content filtering.
-* Custom-field/post-meta filtering.
-* Content ordering.
-* Rich popups with featured images and excerpts.
-* Selected custom fields in popups.
-* Conditional marker colors based on taxonomy terms.
-
-The Free plugin remains fully functional without purchasing Pro.
+The optional Pro edition adds advanced filtering, ordering, conditional marker colors and future content-driven map interfaces.
 
 == Installation ==
 
-1. Install and activate Inblock Map Block.
-2. Open the block editor.
-3. Insert the Inblock Map Block.
-4. Choose the content source and configure the map.
+1. Upload the plugin ZIP through the WordPress Plugins screen.
+2. Activate Inblock Map Block.
+3. Add the block to a post or page and configure the map.
 
 == Frequently Asked Questions ==
 
-= Does this plugin require a Google Maps API key? =
+= Does the default setup require an API key? =
 
-No. The default OpenStreetMap configuration does not require a Google Maps API key.
+No. OpenStreetMap and the included OpenFreeMap styles do not require an API key.
 
-= Can I display custom post types? =
+= Can one publication create several markers? =
 
-Yes. Choose any supported public post type and configure where its latitude and longitude are stored.
+Yes. ACF Pro Repeater rows can each provide a coordinate and optional location label.
 
-= Does it support ACF? =
+= What does Pro add? =
 
-Yes. The Free edition supports ACF Location fields and text fields containing latitude/longitude coordinates.
-
-= What happens if I do not buy Pro? =
-
-Nothing is disabled in the Free edition. Pro only adds additional content filtering, popup, and marker capabilities.
+Pro adds taxonomy/meta filtering, result ordering and conditional marker colors. The Free edition remains fully usable without a licence.
 
 == Changelog ==
 
 = 0.2.0 =
-* Prepared Free and Pro editions from a single codebase.
-* Added Freemius licensing and update infrastructure.
-* Added premium content filtering, rich popups, and conditional marker styling.
-* Exposed existing custom tile, clustering, and custom marker controls in the Free editor.
-* Reworked the release pipeline to build Gutenberg assets before packaging.
-
-= 0.1.13 =
-* Compatibility update for modern block API usage.
-* WordPress.org readme normalization and metadata cleanup.
+* Integrate the Freemius Free/Pro release architecture.
+* Consolidate ACF Repeater multi-location markers and the popup builder.
+* Add OpenFreeMap vector styles, theme colors, presets and custom MapLibre styles.
+* Add premium filtering, ordering and conditional marker extensions.
 
 == Upgrade Notice ==
 
 = 0.2.0 =
-Adds the new Free/Pro architecture and improves the Free editing experience.
+This release consolidates the current MapBlock features and prepares separate Free and Pro packages through Freemius.

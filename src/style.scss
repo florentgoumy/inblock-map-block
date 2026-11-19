@@ -4,5 +4,58 @@
 	min-height: 0;
 }
 
+.inblock-map-block__map-status {
+	margin: 8px 0;
+	font-size: 12px;
+}
+
+.inblock-map-block__map-status.is-error {
+	color: #b32d2e;
+}
+
+.inblock-map-block__color-setting {
+	margin: 16px 0;
+}
+
+/* Gutenberg disables pointer events on non-draggable images inside blocks. */
+.wp-block .leaflet-marker-icon.leaflet-interactive,
+.wp-block .leaflet-pane > svg path.leaflet-interactive {
+	pointer-events: auto;
+}
+
+.inblock-map-block__popup {
+	display: grid;
+	gap: 6px;
+	min-width: 180px;
+}
+
+.inblock-map-block__popup-label {
+	font-weight: 600;
+}
+
+.inblock-map-block__popup-location {
+	font-weight: 600;
+}
+
+.inblock-map-block__popup-image img {
+	display: block;
+	width: 100%;
+	max-width: 240px;
+	height: auto;
+	border-radius: 4px;
+}
+
+.inblock-map-block__popup-button {
+	display: inline-block;
+	padding: 7px 12px;
+	border-radius: 4px;
+	background: #2563eb;
+	color: #fff !important;
+	font-weight: 600;
+	text-decoration: none;
+}
+
 /* Leaflet base styles */
 @import "leaflet/dist/leaflet.css";
+@import "leaflet.markercluster/dist/MarkerCluster.css";
+@import "leaflet.markercluster/dist/MarkerCluster.Default.css";
