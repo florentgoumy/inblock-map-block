@@ -25,6 +25,11 @@ if ( file_exists( $inblock_map_block_autoload ) ) {
 	require_once $inblock_map_block_autoload;
 }
 
+// Let the paid build take ownership when it is activated alongside the free build.
+if ( function_exists( 'imb_fs' ) ) {
+	imb_fs()->set_basename( true, __FILE__ );
+}
+
 if ( function_exists( 'fs_dynamic_init' ) && ! function_exists( 'imb_fs' ) ) {
 	/** Returns the Freemius SDK instance. */
 	function imb_fs() {
@@ -84,9 +89,6 @@ function inblock_map_block_register_block() {
 	}
 	$editor_dependencies = apply_filters( 'inblock_map_block_editor_dependencies', $editor_dependencies );
 
-	$view_dependencies = isset( $view_asset['dependencies'] ) ? $view_asset['dependencies'] : array();
-	$view_dependencies = apply_filters( 'inblock_map_block_view_dependencies', $view_dependencies );
-
 	wp_register_script(
 		'inblock-map-block-editor',
 		plugins_url( 'build/index.js', __FILE__ ),
@@ -123,6 +125,8 @@ function inblock_map_block_register_block() {
 		'dependencies' => array(),
 		'version'      => $asset['version'],
 	);
+	$view_dependencies = isset( $view_asset['dependencies'] ) ? $view_asset['dependencies'] : array();
+	$view_dependencies = apply_filters( 'inblock_map_block_view_dependencies', $view_dependencies );
 
 	wp_register_style(
 		'inblock-map-block-view-style',
