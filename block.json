@@ -7,6 +7,7 @@
 	"icon": "location",
 	"description": "Display an OpenStreetMap map.",
 	"textdomain": "inblock-map-block",
+	"usesContext": [ "postId" ],
 	"supports": {
 		"html": false,
 		"border": {
@@ -38,6 +39,10 @@
 			"type": "boolean",
 			"default": false
 		},
+		"markersMode": {
+			"type": "string",
+			"default": ""
+		},
 		"markersPostType": {
 			"type": "string",
 			"default": ""
@@ -49,6 +54,18 @@
 		"acfLocationField": {
 			"type": "string",
 			"default": "location"
+		},
+		"acfRepeaterField": {
+			"type": "string",
+			"default": ""
+		},
+		"acfRepeaterCoordinatesField": {
+			"type": "string",
+			"default": ""
+		},
+		"acfRepeaterLabelField": {
+			"type": "string",
+			"default": ""
 		},
 		"latMetaKey": {
 			"type": "string",
@@ -66,6 +83,18 @@
 			"type": "boolean",
 			"default": true
 		},
+		"markerPopupShowTitle": {
+			"type": "boolean",
+			"default": true
+		},
+		"markerPopupShowLink": {
+			"type": "boolean",
+			"default": true
+		},
+		"markerPopupLinkStyle": {
+			"type": "string",
+			"default": "link"
+		},
 		"markersAutoFit": {
 			"type": "boolean",
 			"default": true
@@ -74,6 +103,14 @@
 			"type": "string",
 			"default": "default"
 		},
+		"markerDetailsLinkLabel": {
+			"type": "string",
+			"default": "Plus d’infos"
+		},
+		"markerPopupFields": {
+			"type": "array",
+			"default": []
+		},
 		"markerColor": {
 			"type": "string",
 			"default": "#2563eb"
@@ -81,6 +118,14 @@
 		"baseMap": {
 			"type": "string",
 			"default": "osm"
+		},
+		"baseMapColorMode": {
+			"type": "string",
+			"default": "original"
+		},
+		"baseMapColors": {
+			"type": "object",
+			"default": {}
 		},
 		"showStartPosition": {
 			"type": "boolean",
@@ -102,7 +147,15 @@
 			"type": "boolean",
 			"default": false
 		},
+		"customBaseMapType": {
+			"type": "string",
+			"default": "xyz"
+		},
 		"customBaseMapUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"customMapLibreStyleUrl": {
 			"type": "string",
 			"default": ""
 		},

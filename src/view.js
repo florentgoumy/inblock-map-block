@@ -1,8 +1,17 @@
 import L from 'leaflet';
 import 'leaflet.markercluster';
+import '@maplibre/maplibre-gl-leaflet';
+import * as maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 import './leaflet-icons';
-import { getTileConfig } from './tile';
+import {
+	configureMapLibreWorker,
+	createBaseLayer,
+	getTileConfig,
+} from './tile';
+
+configureMapLibreWorker( maplibregl );
 
 function escapeHtml( str ) {
 	return String( str )
@@ -15,6 +24,18 @@ function escapeHtml( str ) {
 
 function parseBool( v ) {
 	return v === '1' || v === 'true' || v === 1 || v === true;
+}
+
+function popupFieldsHtml( fields ) {
+	if ( ! Array.isArray( fields ) ) return '';
+	return fields.slice( 0, 5 ).map( ( field ) => {
+		const label = field?.show_label && field?.label ? '<span class="inblock-map-block__popup-label">' + escapeHtml( field.label ) + ' : </span>' : '';
+		if ( field?.type === 'image' && field?.value?.url ) {
+			return '<div class="inblock-map-block__popup-field inblock-map-block__popup-image">' + label + '<img src="' + escapeHtml( field.value.url ) + '" alt="' + escapeHtml( field.value.alt || '' ) + '" loading="lazy"></div>';
+		}
+		const value = field?.value === undefined || field?.value === null ? '' : escapeHtml( field.value );
+		return value ? '<div class="inblock-map-block__popup-field">' + label + '<span>' + value + '</span></div>' : '';
+	} ).join( '' );
 }
 
 function readMarkers( root ) {
@@ -96,11 +117,22 @@ function initMap( root ) {
 	const baseMap = root.dataset.baseMap || 'osm';
 	const customBaseMap = {
 		enabled: parseBool( root.dataset.customBaseMapEnabled ),
+		type: root.dataset.customBaseMapType || 'xyz',
 		url: root.dataset.customBaseMapUrl || '',
+		styleUrl: root.dataset.customMaplibreStyleUrl || '',
 		attribution: root.dataset.customBaseMapAttribution || '',
 	};
+	let baseMapColors = {};
+	try {
+		baseMapColors = JSON.parse( root.dataset.baseMapColors || '{}' );
+	} catch ( error ) {}
 
 	const markerStyle = root.dataset.markerStyle || 'default';
+	const markerDetailsLinkLabel =
+		root.dataset.markerDetailsLinkLabel || 'Plus d’infos';
+	const popupShowTitle = root.dataset.popupShowTitle === undefined || parseBool( root.dataset.popupShowTitle );
+	const popupShowLink = root.dataset.popupShowLink === undefined || parseBool( root.dataset.popupShowLink );
+	const popupLinkStyle = root.dataset.popupLinkStyle === 'button' ? 'button' : 'link';
 	const markerColor = root.dataset.markerColor || '#2563eb';
 	const markersEnabled = parseBool( root.dataset.markersEnabled );
 
@@ -110,9 +142,21 @@ function initMap( root ) {
 	} ).setView( [ lat, lng ], zoom );
 
 	const tile = getTileConfig( baseMap, customBaseMap );
-	L.tileLayer( tile.url, {
-		maxZoom: tile.maxZoom,
-		attribution: tile.attribution,
+	createBaseLayer( L, tile, {
+		colors: baseMapColors,
+		onLoading: () => root.classList.add( 'is-map-loading' ),
+		onLoad: () => {
+			root.classList.remove( 'is-map-loading', 'has-map-error' );
+			root.removeAttribute( 'aria-label' );
+		},
+		onError: () => {
+			root.classList.remove( 'is-map-loading' );
+			root.classList.add( 'has-map-error' );
+			root.setAttribute(
+				'aria-label',
+				'The map provider could not be loaded.'
+			);
+		},
 	} ).addTo( map );
 
 	if ( ! markersEnabled ) {
@@ -152,11 +196,22 @@ function initMap( root ) {
 		if ( markersPopup ) {
 			const title = escapeHtml( m.title || '' );
 			const url = escapeHtml( m.url || '' );
+			const linkLabel = escapeHtml(
+				markerDetailsLinkLabel.trim() || 'Plus d’infos'
+			);
+			const locationLabel = escapeHtml( m.locationLabel || '' );
 			const html =
 				'<div class="inblock-map-block__popup">' +
-				( title ? '<strong>' + title + '</strong>' : '' ) +
-				( url
-					? '<div><a href="' + url + '">' + url + '</a></div>'
+				( popupShowTitle && title ? '<strong>' + title + '</strong>' : '' ) +
+				( locationLabel ? '<div class="inblock-map-block__popup-location">' + locationLabel + '</div>' : '' ) +
+				popupFieldsHtml( m.popupFields ) +
+				( popupShowLink && url
+					? '<div><a href="' +
+					  url +
+					  ( popupLinkStyle === 'button' ? '" class="inblock-map-block__popup-button' : '' ) +
+					  '">' +
+					  linkLabel +
+					  '</a></div>'
 					: '' ) +
 				'</div>';
 			marker.bindPopup( html );
