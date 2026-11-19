@@ -50,4 +50,10 @@ wp-config.php
 # JS
 node_modules/
 
+# Local development and release artifacts.
+.DS_Store
+dist/
+advanced-custom-fields-pro.zip
+AGENTS.md
+
 .git-credentials
