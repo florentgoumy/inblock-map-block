@@ -4,18 +4,64 @@
  * Description:       Gutenberg block to display an OpenStreetMap and plot items from a selected post type.
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Version:           0.1.34
+ * Version:           0.2.0
  * Author:            Inblock
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       inblock-map-block
+ *
+ * @fs_ignore /vendor/
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+define( 'INBLOCK_MAP_BLOCK_VERSION', '0.2.0' );
+define( 'INBLOCK_MAP_BLOCK_FILE', __FILE__ );
+
+$inblock_map_block_autoload = __DIR__ . '/vendor/autoload.php';
+if ( file_exists( $inblock_map_block_autoload ) ) {
+	require_once $inblock_map_block_autoload;
+}
+
+if ( function_exists( 'fs_dynamic_init' ) && ! function_exists( 'imb_fs' ) ) {
+	/** Returns the Freemius SDK instance. */
+	function imb_fs() {
+		global $imb_fs;
+		if ( ! isset( $imb_fs ) ) {
+			$imb_fs = fs_dynamic_init(
+				array(
+					'id'                  => '40192',
+					'slug'                => 'inblock-map-block',
+					'type'                => 'plugin',
+					'public_key'          => 'pk_5910ba94d34f62948ba4a4fbbdb5a',
+					'is_premium'          => true,
+					'premium_suffix'      => 'Pro',
+					'has_premium_version' => true,
+					'has_addons'          => false,
+					'has_paid_plans'      => true,
+					'is_org_compliant'    => true,
+					'wp_org_gatekeeper'   => 'OA7#BoRiBNqdf52FvzEf!!074aRLPs8fspif$7K1#4u4Csys1fQlCecVcUTOs2mcpeVHi#C2j9d09fOTvbC0HloPT7fFee5WdS3G',
+					'menu'                => array(
+						'first-path' => 'plugins.php',
+						'support'    => false,
+					),
+				)
+			);
+		}
+		return $imb_fs;
+	}
+
+	imb_fs();
+	do_action( 'imb_fs_loaded' );
+}
+
 require_once __DIR__ . '/includes/rest.php';
+
+if ( function_exists( 'imb_fs' ) && imb_fs()->can_use_premium_code__premium_only() ) {
+	require_once __DIR__ . '/includes/pro__premium_only.php';
+}
 
 /**
  * Registers the block assets and the block type.
@@ -36,6 +82,10 @@ function inblock_map_block_register_block() {
 			array_diff( $editor_dependencies, array( 'react-jsx-runtime' ) )
 		);
 	}
+	$editor_dependencies = apply_filters( 'inblock_map_block_editor_dependencies', $editor_dependencies );
+
+	$view_dependencies = isset( $view_asset['dependencies'] ) ? $view_asset['dependencies'] : array();
+	$view_dependencies = apply_filters( 'inblock_map_block_view_dependencies', $view_dependencies );
 
 	wp_register_script(
 		'inblock-map-block-editor',
@@ -84,7 +134,7 @@ function inblock_map_block_register_block() {
 	wp_register_script(
 		'inblock-map-block-view',
 		plugins_url( 'build/view.js', __FILE__ ),
-		isset( $view_asset['dependencies'] ) ? $view_asset['dependencies'] : array(),
+		$view_dependencies,
 		isset( $view_asset['version'] ) ? $view_asset['version'] : $asset['version'],
 		true
 	);
@@ -255,21 +305,24 @@ function inblock_map_block_get_repeater_coordinates( $post_id, $repeater_field, 
  * @param int    $markers_limit Collection limit.
  * @return array
  */
-function inblock_map_block_get_markers( $markers_mode, $current_post_id, $markers_posttype, $markers_source, $acf_field, $lat_meta_key, $lng_meta_key, $markers_limit, $repeater_field = '', $repeater_coordinates_field = '', $repeater_label_field = '', $popup_fields = array() ) {
+function inblock_map_block_get_markers( $markers_mode, $current_post_id, $markers_posttype, $markers_source, $acf_field, $lat_meta_key, $lng_meta_key, $markers_limit, $repeater_field = '', $repeater_coordinates_field = '', $repeater_label_field = '', $popup_fields = array(), $attributes = array() ) {
 	$post_ids = array();
 
 	if ( 'single' === $markers_mode && $current_post_id > 0 ) {
 		$post_ids[] = $current_post_id;
 	} elseif ( 'collection' === $markers_mode && ! empty( $markers_posttype ) ) {
-		$post_ids = get_posts(
+		$query_args = apply_filters(
+			'inblock_map_block_query_args',
 			array(
 				'post_type'      => $markers_posttype,
 				'post_status'    => 'publish',
 				'posts_per_page' => $markers_limit,
 				'no_found_rows'  => true,
 				'fields'         => 'ids',
-			)
+			),
+			$attributes
 		);
+		$post_ids = get_posts( $query_args );
 	}
 
 	$markers = array();
@@ -333,7 +386,7 @@ function inblock_map_block_get_markers( $markers_mode, $current_post_id, $marker
 		}
 
 		foreach ( $coordinates_list as $location_index => $coordinates ) {
-			$markers[] = array(
+			$marker = array(
 				'id'            => $post_id,
 				'markerId'      => $post_id . '-' . $location_index,
 				'title'         => get_the_title( $post_id ),
@@ -343,6 +396,7 @@ function inblock_map_block_get_markers( $markers_mode, $current_post_id, $marker
 				'lng'           => $coordinates['lng'],
 				'popupFields'   => $popup_values,
 			);
+			$markers[] = apply_filters( 'inblock_map_block_marker_data', $marker, $post_id, $attributes );
 		}
 	}
 
@@ -544,7 +598,8 @@ function inblock_map_block_render( $attributes, $content = '', $block = null ) {
 			$repeater_field,
 			$repeater_coordinates_field,
 			$repeater_label_field,
-			$marker_popup_fields
+			$marker_popup_fields,
+			$attributes
 		)
 		: array();
 

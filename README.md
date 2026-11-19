@@ -1,58 +1,58 @@
 # Inblock Map Block
 
-Contributors: inblock  
-Tags: block, gutenberg, map, openstreetmap, leaflet  
-Requires at least: 6.0  
-Tested up to: 7.0  
-Requires PHP: 7.4  
-Stable tag: 0.1.34
-License: GPLv2 or later  
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Lightweight Gutenberg map block for dynamic WordPress content.
 
-Gutenberg block that renders an OpenStreetMap map (Leaflet) on the front-end, with optional marker settings.
+## Free edition
 
-## Description
+The Free edition is a complete mapping block for ordinary WordPress sites:
 
-- Adds a Gutenberg block **Inblock Map Block**.
-- Provides map controls for center, zoom, and height.
-- Supports optional marker display from configured content sources.
-- Includes OpenFreeMap styles, the experimental 3D style, reusable color presets,
-  theme colors, and custom MapLibre JSON or XYZ sources.
-- Front-end rendering is handled via Leaflet.
+- OpenStreetMap and OpenFreeMap vector basemaps.
+- Single and collection marker modes.
+- ACF Location, text coordinates, ACF Repeater and post-meta sources.
+- Multiple locations per post, clustering and editor previews.
+- Configurable popups with WordPress and ACF fields (up to five).
+- Theme-aware colors, MapBlock color presets and custom colors.
+- Custom XYZ sources and hosted MapLibre style JSON URLs.
+- Border, shadow and responsive block controls.
 
-## Usage
+## Pro edition
 
-1. Build assets:
+The licensed Pro package adds content-oriented controls:
 
-```bash
-npm install
-npm run build
-```
+- Taxonomy and post-meta filtering.
+- Result ordering.
+- Conditional marker colors driven by taxonomy terms.
+- Premium extension bundles and future search/list synchronization features.
 
-2. Install in WordPress:
-
-- Copy the plugin folder to `wp-content/plugins/inblock-map-block/`
-- Activate **Inblock Map Block** in WP admin.
-
-3. Add the block in a post/page and configure map settings.
+The existing premium rich-popup attributes remain supported for compatibility,
+although the Free popup builder now covers most common popup content needs.
 
 ## Development
 
+Install dependencies and build all Free and Pro assets:
+
 ```bash
-npm install
+npm ci
+composer install
+npm run build
+```
+
+For local WordPress Playground development:
+
+```bash
 npm run dev
 ```
 
-`npm run dev` launches a local WordPress Playground with this plugin mounted and
-activated directly from the current folder. It also watches the JavaScript and
-CSS sources and rebuilds the assets when they change. No plugin copy is needed.
+## Freemius release model
 
-The first launch downloads WordPress and the PHP runtime. Playground stores the
-local site data outside the repository and reuses it on subsequent launches.
+This repository is the single source for both editions. Freemius product `40192`
+generates the WordPress.org-compatible Free package and the licensed Pro package.
+Premium PHP and JavaScript files use Freemius `__premium_only` naming conventions
+and are removed from the generated Free archive.
 
-To run the checks separately:
+Never commit the Freemius product secret key. Development-only constants belong
+in the local WordPress `wp-config.php`.
 
-```bash
-npm run lint:js
-npm run build
-```
+## License
+
+GPL-2.0-or-later.

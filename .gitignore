@@ -49,6 +49,7 @@ wp-config.php
 
 # JS
 node_modules/
+/vendor/
 
 # Local development and release artifacts.
 .DS_Store

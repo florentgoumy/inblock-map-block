@@ -64,7 +64,8 @@ export const BASE_MAP_DESCRIPTIONS = {
 	openfreemap_bright: 'Bright and contrasted for general-purpose maps.',
 	openfreemap_dark: 'Dark background with strong visual contrast.',
 	openfreemap_fiord: 'Muted blue-gray style for a more editorial appearance.',
-	openfreemap_3d: 'Tilted Liberty perspective inspired by the OpenFreeMap 3D demo. More demanding on the browser.',
+	openfreemap_3d:
+		'Tilted Liberty perspective inspired by the OpenFreeMap 3D demo. More demanding on the browser.',
 };
 
 function setPaintColor( map, layer, property, color ) {
@@ -91,13 +92,20 @@ export function applySemanticColors( map, colors = {} ) {
 			setPaintColor( map, layer, 'line-color', colors.water );
 		} else if ( sourceLayer === 'waterway' ) {
 			setPaintColor( map, layer, 'line-color', colors.water );
-		} else if ( [ 'landcover', 'landuse', 'park' ].includes( sourceLayer ) ) {
+		} else if (
+			[ 'landcover', 'landuse', 'park' ].includes( sourceLayer )
+		) {
 			setPaintColor( map, layer, 'fill-color', colors.nature );
 		} else if ( sourceLayer === 'transportation' ) {
 			setPaintColor( map, layer, 'line-color', colors.roads );
 		} else if ( sourceLayer === 'building' ) {
 			setPaintColor( map, layer, 'fill-color', colors.buildings );
-			setPaintColor( map, layer, 'fill-extrusion-color', colors.buildings );
+			setPaintColor(
+				map,
+				layer,
+				'fill-extrusion-color',
+				colors.buildings
+			);
 		}
 
 		if ( layer.type === 'symbol' ) {

@@ -1,0 +1,14 @@
+{
+  "name": "inblock/inblock-map-block",
+  "description": "Gutenberg map block for dynamic WordPress content.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=7.4",
+    "freemius/wordpress-sdk": "2.13.4"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}

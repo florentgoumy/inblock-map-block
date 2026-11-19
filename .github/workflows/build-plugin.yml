@@ -2,6 +2,9 @@ name: Build WordPress Plugin
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
   push:
     tags:
       - "v*"
@@ -17,24 +20,57 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Prepare build directory
-        run: |
-          rm -rf build
-          mkdir -p "build/${PLUGIN_SLUG}"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
 
-      - name: Copy plugin files
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Build Gutenberg assets
+        run: npm run build
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          tools: composer:v2
+
+      - name: Install production PHP dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+      - name: Validate PHP syntax
         run: |
-          rsync -av ./ "build/${PLUGIN_SLUG}/" \
+          find . -type f -name "*.php" \
+            -not -path "./vendor/*" \
+            -not -path "./node_modules/*" \
+            -print0 | xargs -0 -n1 php -l
+
+      - name: Validate JavaScript
+        run: npm run lint:js
+
+      - name: Prepare release directory
+        run: |
+          rm -rf dist
+          mkdir -p "dist/${PLUGIN_SLUG}"
+          rsync -av ./ "dist/${PLUGIN_SLUG}/" \
             --exclude=".git/" \
             --exclude=".github/" \
             --exclude=".gitignore" \
             --exclude="node_modules/" \
+            --exclude="src/" \
             --exclude="wp-org-assets/" \
-            --exclude="build/" \
+            --exclude="dist/" \
             --exclude=".DS_Store"
 
-      - name: Upload installable plugin archive
+      - name: Create upload ZIP
+        working-directory: dist
+        run: zip -rq "${PLUGIN_SLUG}.zip" "${PLUGIN_SLUG}"
+
+      - name: Upload Freemius-ready archive
         uses: actions/upload-artifact@v5
         with:
-          name: inblock-map-block
-          path: build/inblock-map-block/
+          name: inblock-map-block-release
+          path: dist/inblock-map-block.zip

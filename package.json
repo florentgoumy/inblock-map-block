@@ -1,12 +1,12 @@
 {
 	"name": "inblock-map-block",
-	"version": "0.1.34",
+	"version": "0.2.0",
 	"private": true,
 	"description": "Gutenberg block to display an OpenStreetMap and plot items from a selected post type.",
 	"license": "GPL-2.0-or-later",
 	"scripts": {
-		"build": "wp-scripts build src/index.js src/view.js",
-		"start": "wp-scripts start src/index.js src/view.js",
+		"build": "wp-scripts build src/index.js src/view.js src/pro-edit__premium_only.js src/pro-view__premium_only.js",
+		"start": "wp-scripts start src/index.js src/view.js src/pro-edit__premium_only.js src/pro-view__premium_only.js",
 		"wordpress": "wp-playground-cli start",
 		"dev": "concurrently --kill-others --names assets,wordpress --prefix-colors blue,green \"npm run start\" \"npm run wordpress\"",
 		"lint:js": "wp-scripts lint-js"
@@ -15,7 +15,8 @@
 		"@types/leaflet": "^1.9.21",
 		"@wordpress/scripts": "^30.12.0",
 		"@wp-playground/cli": "^3.1.50",
-		"concurrently": "^10.0.5"
+		"concurrently": "^10.0.5",
+		"typescript": "5.9.3"
 	},
 	"dependencies": {
 		"@maplibre/maplibre-gl-leaflet": "^0.1.4",
