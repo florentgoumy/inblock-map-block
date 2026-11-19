@@ -4,7 +4,7 @@
  * Description:       Gutenberg block to display an OpenStreetMap and plot items from a selected post type.
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Version:           0.2.0
+ * Version:           0.2.1
  * Author:            Inblock
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'INBLOCK_MAP_BLOCK_VERSION', '0.2.0' );
+define( 'INBLOCK_MAP_BLOCK_VERSION', '0.2.1' );
 define( 'INBLOCK_MAP_BLOCK_FILE', __FILE__ );
 
 $inblock_map_block_autoload = __DIR__ . '/vendor/autoload.php';

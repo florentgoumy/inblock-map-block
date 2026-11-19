@@ -4,7 +4,7 @@ Tags: block, gutenberg, map, openstreetmap, leaflet, acf
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,10 @@ Pro adds taxonomy/meta filtering, result ordering and conditional marker colors.
 
 == Changelog ==
 
+= 0.2.1 =
+* Update the Freemius WordPress SDK to 2.13.5.
+* Finalize paid-build takeover and public asset dependency loading.
+
 = 0.2.0 =
 * Integrate the Freemius Free/Pro release architecture.
 * Consolidate ACF Repeater multi-location markers and the popup builder.
@@ -56,6 +60,9 @@ Pro adds taxonomy/meta filtering, result ordering and conditional marker colors.
 * Add premium filtering, ordering and conditional marker extensions.
 
 == Upgrade Notice ==
+
+= 0.2.1 =
+This maintenance release updates the Freemius SDK before the first public Free/Pro deployment.
 
 = 0.2.0 =
 This release consolidates the current MapBlock features and prepares separate Free and Pro packages through Freemius.
