@@ -48,31 +48,70 @@ async function fetchPostTypes() {
 }
 
 function escapeHtml( str ) {
-	return String( str ).replaceAll( '&', '&amp;' ).replaceAll( '<', '&lt;' ).replaceAll( '>', '&gt;' ).replaceAll( '"', '&quot;' ).replaceAll( "'", '&#039;' );
+	return String( str )
+		.replaceAll( '&', '&amp;' )
+		.replaceAll( '<', '&lt;' )
+		.replaceAll( '>', '&gt;' )
+		.replaceAll( '"', '&quot;' )
+		.replaceAll( "'", '&#039;' );
 }
 
 function mixHex( first, second, amount ) {
 	const parse = ( value ) => {
 		const hex = String( value || '' ).replace( '#', '' );
-		const normalized = hex.length === 3 ? hex.split( '' ).map( ( part ) => part + part ).join( '' ) : hex;
-		if ( ! /^[0-9a-f]{6}$/i.test( normalized ) ) return null;
-		return [ 0, 2, 4 ].map( ( index ) => Number.parseInt( normalized.slice( index, index + 2 ), 16 ) );
+		const normalized =
+			hex.length === 3
+				? hex
+						.split( '' )
+						.map( ( part ) => part + part )
+						.join( '' )
+				: hex;
+		if ( ! /^[0-9a-f]{6}$/i.test( normalized ) ) {
+			return null;
+		}
+		return [ 0, 2, 4 ].map( ( index ) =>
+			Number.parseInt( normalized.slice( index, index + 2 ), 16 )
+		);
 	};
 	const a = parse( first );
 	const b = parse( second );
-	if ( ! a || ! b ) return first;
-	return '#' + a.map( ( channel, index ) =>
-		Math.round( channel * ( 1 - amount ) + b[ index ] * amount )
-			.toString( 16 )
-			.padStart( 2, '0' )
-	).join( '' );
+	if ( ! a || ! b ) {
+		return first;
+	}
+	return (
+		'#' +
+		a
+			.map( ( channel, index ) =>
+				Math.round( channel * ( 1 - amount ) + b[ index ] * amount )
+					.toString( 16 )
+					.padStart( 2, '0' )
+			)
+			.join( '' )
+	);
 }
 
 function getThemeMapColors( palette ) {
-	const usable = palette.filter( ( item ) => /^#[0-9a-f]{3,6}$/i.test( item?.color || '' ) );
-	const namedAccent = usable.find( ( item ) => /primary|accent/i.test( `${ item.slug || '' } ${ item.name || '' }` ) );
-	const accent = namedAccent?.color || usable.find( ( item ) => ! [ '#000', '#000000', '#fff', '#ffffff' ].includes( item.color.toLowerCase() ) )?.color || '#2563eb';
-	const contrast = usable.find( ( item ) => /contrast|foreground|text/i.test( `${ item.slug || '' } ${ item.name || '' }` ) )?.color || '#243044';
+	const usable = palette.filter( ( item ) =>
+		/^#[0-9a-f]{3,6}$/i.test( item?.color || '' )
+	);
+	const namedAccent = usable.find( ( item ) =>
+		/primary|accent/i.test( `${ item.slug || '' } ${ item.name || '' }` )
+	);
+	const accent =
+		namedAccent?.color ||
+		usable.find(
+			( item ) =>
+				! [ '#000', '#000000', '#fff', '#ffffff' ].includes(
+					item.color.toLowerCase()
+				)
+		)?.color ||
+		'#2563eb';
+	const contrast =
+		usable.find( ( item ) =>
+			/contrast|foreground|text/i.test(
+				`${ item.slug || '' } ${ item.name || '' }`
+			)
+		)?.color || '#243044';
 	const background = mixHex( '#ffffff', accent, 0.07 );
 	return {
 		background,
@@ -125,13 +164,42 @@ const MAP_COLOR_PRESETS = {
 };
 
 function popupFieldsHtml( fields ) {
-	if ( ! Array.isArray( fields ) ) return '';
-	return fields.slice( 0, 5 ).map( ( field ) => {
-		const label = field?.show_label && field?.label ? '<span class="inblock-map-block__popup-label">' + escapeHtml( field.label ) + ' : </span>' : '';
-		if ( field?.type === 'image' && field?.value?.url ) return '<div class="inblock-map-block__popup-field inblock-map-block__popup-image">' + label + '<img src="' + escapeHtml( field.value.url ) + '" alt="' + escapeHtml( field.value.alt || '' ) + '"></div>';
-		const value = field?.value === undefined || field?.value === null ? '' : escapeHtml( field.value );
-		return value ? '<div class="inblock-map-block__popup-field">' + label + '<span>' + value + '</span></div>' : '';
-	} ).join( '' );
+	if ( ! Array.isArray( fields ) ) {
+		return '';
+	}
+	return fields
+		.slice( 0, 5 )
+		.map( ( field ) => {
+			const label =
+				field?.show_label && field?.label
+					? '<span class="inblock-map-block__popup-label">' +
+					  escapeHtml( field.label ) +
+					  ' : </span>'
+					: '';
+			if ( field?.type === 'image' && field?.value?.url ) {
+				return (
+					'<div class="inblock-map-block__popup-field inblock-map-block__popup-image">' +
+					label +
+					'<img src="' +
+					escapeHtml( field.value.url ) +
+					'" alt="' +
+					escapeHtml( field.value.alt || '' ) +
+					'"></div>'
+				);
+			}
+			const value =
+				field?.value === undefined || field?.value === null
+					? ''
+					: escapeHtml( field.value );
+			return value
+				? '<div class="inblock-map-block__popup-field">' +
+						label +
+						'<span>' +
+						value +
+						'</span></div>'
+				: '';
+		} )
+		.join( '' );
 }
 
 function MarkersSourceHelp() {
@@ -146,7 +214,8 @@ function MarkersSourceHelp() {
 				or <code>\u007Blat,lng\u007D</code>.
 			</div>
 			<div>
-				<strong>ACF Repeater</strong>: one marker per row using a coordinates sub-field.
+				<strong>ACF Repeater</strong>: one marker per row using a
+				coordinates sub-field.
 			</div>
 			<div>
 				<strong>Post meta</strong>: meta keys (default{ ' ' }
@@ -215,9 +284,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 		markersMode || ( markersPostType ? 'collection' : 'single' );
 	const currentPostId = Number.parseInt(
 		context?.postId ||
-			window.wp?.data
-				?.select( 'core/editor' )
-				?.getCurrentPostId?.() ||
+			window.wp?.data?.select( 'core/editor' )?.getCurrentPostId?.() ||
 			'0',
 		10
 	);
@@ -251,14 +318,35 @@ export default function Edit( { attributes, setAttributes, context } ) {
 	}, [] );
 
 	useEffect( () => {
-		if ( ! markersEnabled || markersSource !== 'acf_repeater' ) { setAcfRepeaterOptions( [] ); return; }
-		const query = new URLSearchParams( { post_id: String( currentPostId || 0 ), post_type: effectiveMarkersMode === 'collection' ? ( markersPostType || '' ) : '' } );
-		apiFetch( { path: `/inblock-map-block/v1/acf-repeater-fields?${ query.toString() }` } )
-			.then( ( fields ) => setAcfRepeaterOptions( Array.isArray( fields ) ? fields : [] ) )
+		if ( ! markersEnabled || markersSource !== 'acf_repeater' ) {
+			setAcfRepeaterOptions( [] );
+			return;
+		}
+		const query = new URLSearchParams( {
+			post_id: String( currentPostId || 0 ),
+			post_type:
+				effectiveMarkersMode === 'collection'
+					? markersPostType || ''
+					: '',
+		} );
+		apiFetch( {
+			path: `/inblock-map-block/v1/acf-repeater-fields?${ query.toString() }`,
+		} )
+			.then( ( fields ) =>
+				setAcfRepeaterOptions( Array.isArray( fields ) ? fields : [] )
+			)
 			.catch( () => setAcfRepeaterOptions( [] ) );
-	}, [ markersEnabled, markersSource, currentPostId, effectiveMarkersMode, markersPostType ] );
+	}, [
+		markersEnabled,
+		markersSource,
+		currentPostId,
+		effectiveMarkersMode,
+		markersPostType,
+	] );
 
-	const selectedRepeater = acfRepeaterOptions.find( ( field ) => field.name === acfRepeaterField );
+	const selectedRepeater = acfRepeaterOptions.find(
+		( field ) => field.name === acfRepeaterField
+	);
 	const repeaterSubFields = selectedRepeater?.subFields || [];
 
 	useEffect( () => {
@@ -386,8 +474,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 		const editorWindow = editorDocument.defaultView;
 		const releaseTargets = new Set(
 			[ editorDocument, editorWindow ].filter(
-				( target ) =>
-					target && target !== document && target !== window
+				( target ) => target && target !== document && target !== window
 			)
 		);
 		const releaseEvents = [
@@ -417,7 +504,11 @@ export default function Edit( { attributes, setAttributes, context } ) {
 			finishMapDrag();
 			releaseTargets.forEach( ( target ) => {
 				releaseEvents.forEach( ( eventName ) => {
-					target.removeEventListener( eventName, finishMapDrag, true );
+					target.removeEventListener(
+						eventName,
+						finishMapDrag,
+						true
+					);
 				} );
 				target.removeEventListener( 'blur', finishMapDrag, true );
 			} );
@@ -471,9 +562,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 			onLoading: () => setBaseMapStatus( 'loading' ),
 			onLoad: () => setBaseMapStatus( 'loaded' ),
 			onError: () => setBaseMapStatus( 'error' ),
-		} ).addTo(
-			mapRef.current
-		);
+		} ).addTo( mapRef.current );
 	}, [
 		baseMap,
 		customBaseMapEnabled,
@@ -494,96 +583,136 @@ export default function Edit( { attributes, setAttributes, context } ) {
 				markersLayerRef.current.clearLayers();
 				markersLayerRef.current.remove();
 			}
-		markersLayerRef.current = markersCluster
-			? L.markerClusterGroup( {
-					disableClusteringAtZoom: markersClusterDisableAtZoom,
-			  } )
-			: L.layerGroup();
-		markersLayerRef.current.addTo( mapRef.current );
+			markersLayerRef.current = markersCluster
+				? L.markerClusterGroup( {
+						disableClusteringAtZoom: markersClusterDisableAtZoom,
+				  } )
+				: L.layerGroup();
+			markersLayerRef.current.addTo( mapRef.current );
 
-		if ( ! markersEnabled ) {
-			lastAutoFitKeyRef.current = '';
-			return;
-		}
-
-		const bounds = [];
-
-		previewMarkers.forEach( ( m ) => {
-			if ( ! Number.isFinite( m?.lat ) || ! Number.isFinite( m?.lng ) ) {
+			if ( ! markersEnabled ) {
+				lastAutoFitKeyRef.current = '';
 				return;
 			}
 
-			bounds.push( [ m.lat, m.lng ] );
+			const bounds = [];
 
-			let previewMarker;
-			if ( markerStyle === 'circle' ) {
-				previewMarker = L.circleMarker( [ m.lat, m.lng ], {
-					radius: 8,
-					color: markerColor,
-					fillColor: markerColor,
-					fillOpacity: 0.9,
-					weight: 2,
-				} ).addTo( markersLayerRef.current );
-			} else if ( markerStyle === 'dot' ) {
-				previewMarker = L.circleMarker( [ m.lat, m.lng ], {
-					radius: 5,
-					color: markerColor,
-					fillColor: markerColor,
-					fillOpacity: 0.9,
-					weight: 2,
-				} ).addTo( markersLayerRef.current );
-			} else if ( customMarkerEnabled && customMarkerUrl ) {
-				previewMarker = L.marker( [ m.lat, m.lng ], {
-					icon: L.icon( {
-						iconUrl: customMarkerUrl,
-						iconSize: [ customMarkerWidth, customMarkerHeight ],
-						iconAnchor: [
-							Math.round( customMarkerWidth / 2 ),
-							customMarkerHeight,
-						],
-					} ),
-				} ).addTo( markersLayerRef.current );
-			} else {
-				previewMarker = L.marker( [ m.lat, m.lng ] ).addTo( markersLayerRef.current );
-			}
-
-			if ( markersPopup && previewMarker ) {
-				const title = escapeHtml( m.title || '' );
-				const url = escapeHtml( m.url || '' );
-				const linkLabel = escapeHtml( markerDetailsLinkLabel?.trim() || 'Plus d’infos' );
-				const locationLabel = escapeHtml( m.locationLabel || '' );
-				previewMarker.bindPopup( '<div class="inblock-map-block__popup">' + ( markerPopupShowTitle && title ? '<strong>' + title + '</strong>' : '' ) + ( locationLabel ? '<div class="inblock-map-block__popup-location">' + locationLabel + '</div>' : '' ) + popupFieldsHtml( m.popupFields ) + ( markerPopupShowLink && url ? '<div><a href="' + url + ( markerPopupLinkStyle === 'button' ? '" class="inblock-map-block__popup-button' : '' ) + '">' + linkLabel + '</a></div>' : '' ) + '</div>' );
-			}
-		} );
-
-		if ( markersAutoFit && bounds.length >= 1 ) {
-			const autoFitKey = previewMarkers
-				.filter(
-					( marker ) =>
-						Number.isFinite( marker?.lat ) &&
-						Number.isFinite( marker?.lng )
-				)
-				.map(
-					( marker ) =>
-						`${ marker.markerId || marker.id || '' }:${ marker.lat },${ marker.lng }:${ marker.locationLabel || '' }`
-				)
-				.join( '|' );
-			if ( lastAutoFitKeyRef.current !== autoFitKey ) {
-				lastAutoFitKeyRef.current = autoFitKey;
-				if ( bounds.length === 1 ) {
-					mapRef.current.setView( bounds[ 0 ], mapRef.current.getZoom(), {
-						animate: false,
-					} );
-				} else {
-					mapRef.current.fitBounds( bounds, { padding: [ 20, 20 ] } );
+			previewMarkers.forEach( ( m ) => {
+				if (
+					! Number.isFinite( m?.lat ) ||
+					! Number.isFinite( m?.lng )
+				) {
+					return;
 				}
+
+				bounds.push( [ m.lat, m.lng ] );
+
+				let previewMarker;
+				if ( markerStyle === 'circle' ) {
+					previewMarker = L.circleMarker( [ m.lat, m.lng ], {
+						radius: 8,
+						color: markerColor,
+						fillColor: markerColor,
+						fillOpacity: 0.9,
+						weight: 2,
+					} ).addTo( markersLayerRef.current );
+				} else if ( markerStyle === 'dot' ) {
+					previewMarker = L.circleMarker( [ m.lat, m.lng ], {
+						radius: 5,
+						color: markerColor,
+						fillColor: markerColor,
+						fillOpacity: 0.9,
+						weight: 2,
+					} ).addTo( markersLayerRef.current );
+				} else if ( customMarkerEnabled && customMarkerUrl ) {
+					previewMarker = L.marker( [ m.lat, m.lng ], {
+						icon: L.icon( {
+							iconUrl: customMarkerUrl,
+							iconSize: [ customMarkerWidth, customMarkerHeight ],
+							iconAnchor: [
+								Math.round( customMarkerWidth / 2 ),
+								customMarkerHeight,
+							],
+						} ),
+					} ).addTo( markersLayerRef.current );
+				} else {
+					previewMarker = L.marker( [ m.lat, m.lng ] ).addTo(
+						markersLayerRef.current
+					);
+				}
+
+				if ( markersPopup && previewMarker ) {
+					const title = escapeHtml( m.title || '' );
+					const url = escapeHtml( m.url || '' );
+					const linkLabel = escapeHtml(
+						markerDetailsLinkLabel?.trim() || 'Plus d’infos'
+					);
+					const locationLabel = escapeHtml( m.locationLabel || '' );
+					previewMarker.bindPopup(
+						'<div class="inblock-map-block__popup">' +
+							( markerPopupShowTitle && title
+								? '<strong>' + title + '</strong>'
+								: '' ) +
+							( locationLabel
+								? '<div class="inblock-map-block__popup-location">' +
+								  locationLabel +
+								  '</div>'
+								: '' ) +
+							popupFieldsHtml( m.popupFields ) +
+							( markerPopupShowLink && url
+								? '<div><a href="' +
+								  url +
+								  ( markerPopupLinkStyle === 'button'
+										? '" class="inblock-map-block__popup-button'
+										: '' ) +
+								  '">' +
+								  linkLabel +
+								  '</a></div>'
+								: '' ) +
+							'</div>'
+					);
+				}
+			} );
+
+			if ( markersAutoFit && bounds.length >= 1 ) {
+				const autoFitKey = previewMarkers
+					.filter(
+						( marker ) =>
+							Number.isFinite( marker?.lat ) &&
+							Number.isFinite( marker?.lng )
+					)
+					.map(
+						( marker ) =>
+							`${ marker.markerId || marker.id || '' }:${
+								marker.lat
+							},${ marker.lng }:${ marker.locationLabel || '' }`
+					)
+					.join( '|' );
+				if ( lastAutoFitKeyRef.current !== autoFitKey ) {
+					lastAutoFitKeyRef.current = autoFitKey;
+					if ( bounds.length === 1 ) {
+						mapRef.current.setView(
+							bounds[ 0 ],
+							mapRef.current.getZoom(),
+							{
+								animate: false,
+							}
+						);
+					} else {
+						mapRef.current.fitBounds( bounds, {
+							padding: [ 20, 20 ],
+						} );
+					}
+				}
+			} else {
+				lastAutoFitKeyRef.current = '';
 			}
-		} else {
-			lastAutoFitKeyRef.current = '';
-		}
 		} catch ( error ) {
 			// A malformed ACF row must never make the whole Gutenberg block crash.
-			window.console?.warn?.( 'MapBlock marker preview skipped invalid data.', error );
+			window.console?.warn?.(
+				'MapBlock marker preview skipped invalid data.',
+				error
+			);
 		}
 	}, [
 		markersEnabled,
@@ -646,65 +775,171 @@ export default function Edit( { attributes, setAttributes, context } ) {
 						onChange={ ( value ) =>
 							setAttributes( { baseMap: value } )
 						}
-						help={ __(
+						help={
 							BASE_MAP_DESCRIPTIONS[ baseMap ] ||
+							__(
 								'OpenFreeMap vector styles require no account or API key.',
-							'inblock-map-block'
-						) }
+								'inblock-map-block'
+							)
+						}
 					/>
 
 					{ baseMap.startsWith( 'openfreemap_' ) &&
 						! customBaseMapEnabled && (
-						<>
-							<SelectControl
-								label={ __( 'Map colors', 'inblock-map-block' ) }
-								value={ baseMapColorMode }
-								options={ [
-									{ label: __( 'Original style', 'inblock-map-block' ), value: 'original' },
-									{ label: __( 'Theme palette', 'inblock-map-block' ), value: 'theme' },
-									{ label: __( 'MapBlock — Pastel', 'inblock-map-block' ), value: 'pastel' },
-									{ label: __( 'MapBlock — Monochrome', 'inblock-map-block' ), value: 'monochrome' },
-									{ label: __( 'MapBlock — Nature', 'inblock-map-block' ), value: 'nature' },
-									{ label: __( 'MapBlock — High contrast', 'inblock-map-block' ), value: 'high_contrast' },
-									{ label: __( 'Custom', 'inblock-map-block' ), value: 'custom' },
-								] }
-								onChange={ ( mode ) => {
-									const next = { baseMapColorMode: mode };
-									if ( mode === 'theme' && colors.length ) {
-										next.baseMapColors = getThemeMapColors( colors );
-									} else if ( MAP_COLOR_PRESETS[ mode ] ) {
-										next.baseMapColors = MAP_COLOR_PRESETS[ mode ];
-									}
-									setAttributes( next );
-								} }
-								help={ baseMapColorMode === 'theme' && ! colors.length ? __( 'No theme palette is available.', 'inblock-map-block' ) : undefined }
-							/>
-
-							{ baseMapColorMode === 'custom' && [
-								[ 'background', __( 'Background', 'inblock-map-block' ) ],
-								[ 'water', __( 'Water', 'inblock-map-block' ) ],
-								[ 'nature', __( 'Natural areas', 'inblock-map-block' ) ],
-								[ 'roads', __( 'Main roads', 'inblock-map-block' ) ],
-								[ 'buildings', __( 'Buildings', 'inblock-map-block' ) ],
-								[ 'labels', __( 'Labels', 'inblock-map-block' ) ],
-							].map( ( [ key, label ] ) => (
-								<div key={ key } className="inblock-map-block__color-setting">
-									<strong>{ label }</strong>
-									<ColorPalette
-										colors={ colors }
-										disableCustomColors={ ! allowCustomColors }
-									value={ mapColors[ key ] }
-										onChange={ ( value ) =>
-											setAttributes( { baseMapColors: { ...mapColors, [ key ]: value } } )
+							<>
+								<SelectControl
+									label={ __(
+										'Map colors',
+										'inblock-map-block'
+									) }
+									value={ baseMapColorMode }
+									options={ [
+										{
+											label: __(
+												'Original style',
+												'inblock-map-block'
+											),
+											value: 'original',
+										},
+										{
+											label: __(
+												'Theme palette',
+												'inblock-map-block'
+											),
+											value: 'theme',
+										},
+										{
+											label: __(
+												'MapBlock — Pastel',
+												'inblock-map-block'
+											),
+											value: 'pastel',
+										},
+										{
+											label: __(
+												'MapBlock — Monochrome',
+												'inblock-map-block'
+											),
+											value: 'monochrome',
+										},
+										{
+											label: __(
+												'MapBlock — Nature',
+												'inblock-map-block'
+											),
+											value: 'nature',
+										},
+										{
+											label: __(
+												'MapBlock — High contrast',
+												'inblock-map-block'
+											),
+											value: 'high_contrast',
+										},
+										{
+											label: __(
+												'Custom',
+												'inblock-map-block'
+											),
+											value: 'custom',
+										},
+									] }
+									onChange={ ( mode ) => {
+										const next = { baseMapColorMode: mode };
+										if (
+											mode === 'theme' &&
+											colors.length
+										) {
+											next.baseMapColors =
+												getThemeMapColors( colors );
+										} else if (
+											MAP_COLOR_PRESETS[ mode ]
+										) {
+											next.baseMapColors =
+												MAP_COLOR_PRESETS[ mode ];
 										}
-									/>
-								</div>
-							) ) }
-						</>
-					) }
+										setAttributes( next );
+									} }
+									help={
+										baseMapColorMode === 'theme' &&
+										! colors.length
+											? __(
+													'No theme palette is available.',
+													'inblock-map-block'
+											  )
+											: undefined
+									}
+								/>
+
+								{ baseMapColorMode === 'custom' &&
+									[
+										[
+											'background',
+											__(
+												'Background',
+												'inblock-map-block'
+											),
+										],
+										[
+											'water',
+											__( 'Water', 'inblock-map-block' ),
+										],
+										[
+											'nature',
+											__(
+												'Natural areas',
+												'inblock-map-block'
+											),
+										],
+										[
+											'roads',
+											__(
+												'Main roads',
+												'inblock-map-block'
+											),
+										],
+										[
+											'buildings',
+											__(
+												'Buildings',
+												'inblock-map-block'
+											),
+										],
+										[
+											'labels',
+											__( 'Labels', 'inblock-map-block' ),
+										],
+									].map( ( [ key, label ] ) => (
+										<div
+											key={ key }
+											className="inblock-map-block__color-setting"
+										>
+											<strong>{ label }</strong>
+											<ColorPalette
+												colors={ colors }
+												disableCustomColors={
+													! allowCustomColors
+												}
+												value={ mapColors[ key ] }
+												onChange={ ( value ) =>
+													setAttributes( {
+														baseMapColors: {
+															...mapColors,
+															[ key ]: value,
+														},
+													} )
+												}
+											/>
+										</div>
+									) ) }
+							</>
+						) }
 
 					<ToggleControl
-						label={ __( 'Use a custom map source', 'inblock-map-block' ) }
+						label={ __(
+							'Use a custom map source',
+							'inblock-map-block'
+						) }
 						checked={ !! customBaseMapEnabled }
 						onChange={ ( value ) =>
 							setAttributes( { customBaseMapEnabled: !! value } )
@@ -714,53 +949,100 @@ export default function Edit( { attributes, setAttributes, context } ) {
 					{ customBaseMapEnabled && (
 						<>
 							<SelectControl
-								label={ __( 'Custom source type', 'inblock-map-block' ) }
+								label={ __(
+									'Custom source type',
+									'inblock-map-block'
+								) }
 								value={ customBaseMapType }
 								options={ [
-									{ label: __( 'XYZ raster tiles', 'inblock-map-block' ), value: 'xyz' },
-									{ label: __( 'MapLibre style (JSON URL)', 'inblock-map-block' ), value: 'maplibre' },
+									{
+										label: __(
+											'XYZ raster tiles',
+											'inblock-map-block'
+										),
+										value: 'xyz',
+									},
+									{
+										label: __(
+											'MapLibre style (JSON URL)',
+											'inblock-map-block'
+										),
+										value: 'maplibre',
+									},
 								] }
-								onChange={ ( value ) => setAttributes( { customBaseMapType: value } ) }
+								onChange={ ( value ) =>
+									setAttributes( {
+										customBaseMapType: value,
+									} )
+								}
 							/>
 							{ customBaseMapType === 'maplibre' ? (
 								<TextControl
-									label={ __( 'MapLibre style JSON URL', 'inblock-map-block' ) }
+									label={ __(
+										'MapLibre style JSON URL',
+										'inblock-map-block'
+									) }
 									value={ customMapLibreStyleUrl || '' }
 									placeholder="https://example.com/style.json"
 									type="url"
-									onChange={ ( value ) => setAttributes( { customMapLibreStyleUrl: value } ) }
-									help={ __( 'The style and all its fonts, sprites and data sources must allow browser access (CORS).', 'inblock-map-block' ) }
+									onChange={ ( value ) =>
+										setAttributes( {
+											customMapLibreStyleUrl: value,
+										} )
+									}
+									help={ __(
+										'The style and all its fonts, sprites and data sources must allow browser access (CORS).',
+										'inblock-map-block'
+									) }
 								/>
 							) : (
 								<>
-							<TextControl
-								label={ __( 'XYZ tile URL', 'inblock-map-block' ) }
-								value={ customBaseMapUrl || '' }
-								placeholder="https://example.com/{z}/{x}/{y}.png"
-								onChange={ ( value ) =>
-									setAttributes( { customBaseMapUrl: value } )
-								}
-							/>
-							<TextControl
-								label={ __( 'Tile attribution', 'inblock-map-block' ) }
-								value={ customBaseMapAttribution || '' }
-								onChange={ ( value ) =>
-									setAttributes( {
-										customBaseMapAttribution: value,
-									} )
-								}
-								help={ __( 'Required by most tile providers.', 'inblock-map-block' ) }
-							/>
+									<TextControl
+										label={ __(
+											'XYZ tile URL',
+											'inblock-map-block'
+										) }
+										value={ customBaseMapUrl || '' }
+										placeholder="https://example.com/{z}/{x}/{y}.png"
+										onChange={ ( value ) =>
+											setAttributes( {
+												customBaseMapUrl: value,
+											} )
+										}
+									/>
+									<TextControl
+										label={ __(
+											'Tile attribution',
+											'inblock-map-block'
+										) }
+										value={ customBaseMapAttribution || '' }
+										onChange={ ( value ) =>
+											setAttributes( {
+												customBaseMapAttribution: value,
+											} )
+										}
+										help={ __(
+											'Required by most tile providers.',
+											'inblock-map-block'
+										) }
+									/>
 								</>
 							) }
 						</>
 					) }
 
 					{ baseMapStatus === 'loading' && (
-						<p className="inblock-map-block__map-status">{ __( 'Loading map…', 'inblock-map-block' ) }</p>
+						<p className="inblock-map-block__map-status">
+							{ __( 'Loading map…', 'inblock-map-block' ) }
+						</p>
 					) }
 					{ baseMapStatus === 'error' && (
-						<p className="inblock-map-block__map-status is-error">{ __( 'The map provider could not be loaded. Check your connection or choose another base map.', 'inblock-map-block' ) }</p>
+						<p className="inblock-map-block__map-status is-error">
+							{ __(
+								'The map provider could not be loaded. Check your connection or choose another base map.',
+								'inblock-map-block'
+							) }
+						</p>
 					) }
 
 					<p>
@@ -854,7 +1136,10 @@ export default function Edit( { attributes, setAttributes, context } ) {
 								selected={ effectiveMarkersMode }
 								options={ [
 									{
-										label: __( 'Single', 'inblock-map-block' ),
+										label: __(
+											'Single',
+											'inblock-map-block'
+										),
 										value: 'single',
 									},
 									{
@@ -875,11 +1160,11 @@ export default function Edit( { attributes, setAttributes, context } ) {
 									? __(
 											'Uses the location of the current content.',
 											'inblock-map-block'
-										)
+									  )
 									: __(
 											'Lists locations from a selected content type.',
 											'inblock-map-block'
-										) }
+									  ) }
 							</p>
 
 							{ effectiveMarkersMode === 'collection' && (
@@ -914,11 +1199,11 @@ export default function Edit( { attributes, setAttributes, context } ) {
 										? __(
 												'Marker source',
 												'inblock-map-block'
-											)
+										  )
 										: __(
 												'Markers source',
 												'inblock-map-block'
-											) }
+										  ) }
 								</span>
 								<MarkersSourceHelp />
 							</div>
@@ -937,7 +1222,10 @@ export default function Edit( { attributes, setAttributes, context } ) {
 										value: 'acf_text_latlng',
 									},
 									{
-										label: __( 'ACF Repeater / Multiple locations', 'inblock-map-block' ),
+										label: __(
+											'ACF Repeater / Multiple locations',
+											'inblock-map-block'
+										),
 										value: 'acf_repeater',
 									},
 									{
@@ -970,23 +1258,84 @@ export default function Edit( { attributes, setAttributes, context } ) {
 							{ markersSource === 'acf_repeater' && (
 								<>
 									<SelectControl
-										label={ __( 'Repeater field', 'inblock-map-block' ) }
+										label={ __(
+											'Repeater field',
+											'inblock-map-block'
+										) }
 										value={ acfRepeaterField }
-										options={ [ { label: '—', value: '' }, ...acfRepeaterOptions.map( ( field ) => ( { label: `${ field.label } (${ field.name })`, value: field.name } ) ) ] }
-										onChange={ ( value ) => setAttributes( { acfRepeaterField: value, acfRepeaterCoordinatesField: '', acfRepeaterLabelField: '' } ) }
+										options={ [
+											{ label: '—', value: '' },
+											...acfRepeaterOptions.map(
+												( field ) => ( {
+													label: `${ field.label } (${ field.name })`,
+													value: field.name,
+												} )
+											),
+										] }
+										onChange={ ( value ) =>
+											setAttributes( {
+												acfRepeaterField: value,
+												acfRepeaterCoordinatesField: '',
+												acfRepeaterLabelField: '',
+											} )
+										}
 									/>
 									<SelectControl
-										label={ __( 'Coordinates sub-field', 'inblock-map-block' ) }
+										label={ __(
+											'Coordinates sub-field',
+											'inblock-map-block'
+										) }
 										value={ acfRepeaterCoordinatesField }
-										options={ [ { label: '—', value: '' }, ...repeaterSubFields.map( ( field ) => ( { label: `${ field.label } (${ field.name })`, value: field.name } ) ) ] }
-										onChange={ ( value ) => setAttributes( { acfRepeaterCoordinatesField: value } ) }
-										helperText={ __( 'Expected format: {latitude,longitude}', 'inblock-map-block' ) }
+										options={ [
+											{ label: '—', value: '' },
+											...repeaterSubFields.map(
+												( field ) => ( {
+													label: `${ field.label } (${ field.name })`,
+													value: field.name,
+												} )
+											),
+										] }
+										onChange={ ( value ) =>
+											setAttributes( {
+												acfRepeaterCoordinatesField:
+													value,
+											} )
+										}
+										helperText={ __(
+											'Expected format: {latitude,longitude}',
+											'inblock-map-block'
+										) }
 									/>
 									<SelectControl
-										label={ __( 'Location label sub-field', 'inblock-map-block' ) }
+										label={ __(
+											'Location label sub-field',
+											'inblock-map-block'
+										) }
 										value={ acfRepeaterLabelField }
-										options={ [ { label: __( 'None', 'inblock-map-block' ), value: '' }, ...repeaterSubFields.filter( ( field ) => field.name !== acfRepeaterCoordinatesField ).map( ( field ) => ( { label: `${ field.label } (${ field.name })`, value: field.name } ) ) ] }
-										onChange={ ( value ) => setAttributes( { acfRepeaterLabelField: value } ) }
+										options={ [
+											{
+												label: __(
+													'None',
+													'inblock-map-block'
+												),
+												value: '',
+											},
+											...repeaterSubFields
+												.filter(
+													( field ) =>
+														field.name !==
+														acfRepeaterCoordinatesField
+												)
+												.map( ( field ) => ( {
+													label: `${ field.label } (${ field.name })`,
+													value: field.name,
+												} ) ),
+										] }
+										onChange={ ( value ) =>
+											setAttributes( {
+												acfRepeaterLabelField: value,
+											} )
+										}
 									/>
 								</>
 							) }

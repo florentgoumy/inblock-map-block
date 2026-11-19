@@ -27,15 +27,42 @@ function parseBool( v ) {
 }
 
 function popupFieldsHtml( fields ) {
-	if ( ! Array.isArray( fields ) ) return '';
-	return fields.slice( 0, 5 ).map( ( field ) => {
-		const label = field?.show_label && field?.label ? '<span class="inblock-map-block__popup-label">' + escapeHtml( field.label ) + ' : </span>' : '';
-		if ( field?.type === 'image' && field?.value?.url ) {
-			return '<div class="inblock-map-block__popup-field inblock-map-block__popup-image">' + label + '<img src="' + escapeHtml( field.value.url ) + '" alt="' + escapeHtml( field.value.alt || '' ) + '" loading="lazy"></div>';
-		}
-		const value = field?.value === undefined || field?.value === null ? '' : escapeHtml( field.value );
-		return value ? '<div class="inblock-map-block__popup-field">' + label + '<span>' + value + '</span></div>' : '';
-	} ).join( '' );
+	if ( ! Array.isArray( fields ) ) {
+		return '';
+	}
+	return fields
+		.slice( 0, 5 )
+		.map( ( field ) => {
+			const label =
+				field?.show_label && field?.label
+					? '<span class="inblock-map-block__popup-label">' +
+					  escapeHtml( field.label ) +
+					  ' : </span>'
+					: '';
+			if ( field?.type === 'image' && field?.value?.url ) {
+				return (
+					'<div class="inblock-map-block__popup-field inblock-map-block__popup-image">' +
+					label +
+					'<img src="' +
+					escapeHtml( field.value.url ) +
+					'" alt="' +
+					escapeHtml( field.value.alt || '' ) +
+					'" loading="lazy"></div>'
+				);
+			}
+			const value =
+				field?.value === undefined || field?.value === null
+					? ''
+					: escapeHtml( field.value );
+			return value
+				? '<div class="inblock-map-block__popup-field">' +
+						label +
+						'<span>' +
+						value +
+						'</span></div>'
+				: '';
+		} )
+		.join( '' );
 }
 
 function readMarkers( root ) {
@@ -130,9 +157,14 @@ function initMap( root ) {
 	const markerStyle = root.dataset.markerStyle || 'default';
 	const markerDetailsLinkLabel =
 		root.dataset.markerDetailsLinkLabel || 'Plus d’infos';
-	const popupShowTitle = root.dataset.popupShowTitle === undefined || parseBool( root.dataset.popupShowTitle );
-	const popupShowLink = root.dataset.popupShowLink === undefined || parseBool( root.dataset.popupShowLink );
-	const popupLinkStyle = root.dataset.popupLinkStyle === 'button' ? 'button' : 'link';
+	const popupShowTitle =
+		root.dataset.popupShowTitle === undefined ||
+		parseBool( root.dataset.popupShowTitle );
+	const popupShowLink =
+		root.dataset.popupShowLink === undefined ||
+		parseBool( root.dataset.popupShowLink );
+	const popupLinkStyle =
+		root.dataset.popupLinkStyle === 'button' ? 'button' : 'link';
 	const markerColor = root.dataset.markerColor || '#2563eb';
 	const markersEnabled = parseBool( root.dataset.markersEnabled );
 
@@ -220,13 +252,21 @@ function initMap( root ) {
 			const locationLabel = escapeHtml( m.locationLabel || '' );
 			const html =
 				'<div class="inblock-map-block__popup">' +
-				( popupShowTitle && title ? '<strong>' + title + '</strong>' : '' ) +
-				( locationLabel ? '<div class="inblock-map-block__popup-location">' + locationLabel + '</div>' : '' ) +
+				( popupShowTitle && title
+					? '<strong>' + title + '</strong>'
+					: '' ) +
+				( locationLabel
+					? '<div class="inblock-map-block__popup-location">' +
+					  locationLabel +
+					  '</div>'
+					: '' ) +
 				popupFieldsHtml( m.popupFields ) +
 				( popupShowLink && url
 					? '<div><a href="' +
 					  url +
-					  ( popupLinkStyle === 'button' ? '" class="inblock-map-block__popup-button' : '' ) +
+					  ( popupLinkStyle === 'button'
+							? '" class="inblock-map-block__popup-button'
+							: '' ) +
 					  '">' +
 					  linkLabel +
 					  '</a></div>'
