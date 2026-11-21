@@ -1,3 +1,8 @@
+/* Leaflet base styles */
+@import "leaflet/dist/leaflet.css";
+@import "leaflet.markercluster/dist/MarkerCluster.css";
+@import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+
 /* Editor styles */
 .inblock-map-block__map {
 	width: 100%;
@@ -55,7 +60,3 @@
 	text-decoration: none;
 }
 
-/* Leaflet base styles */
-@import "leaflet/dist/leaflet.css";
-@import "leaflet.markercluster/dist/MarkerCluster.css";
-@import "leaflet.markercluster/dist/MarkerCluster.Default.css";

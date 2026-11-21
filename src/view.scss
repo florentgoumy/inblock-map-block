@@ -1,8 +1,8 @@
+/* Leaflet base styles */
+@import "leaflet/dist/leaflet.css";
+
 /* Front-end styles for the map block */
 .inblock-map-block__map {
 	width: 100%;
 	min-height: 320px;
 }
-
-/* Leaflet base styles */
-@import "leaflet/dist/leaflet.css";
