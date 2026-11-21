@@ -2,13 +2,15 @@
 /**
  * Plugin Name:       Inblock Map Block
  * Description:       Gutenberg block to display an OpenStreetMap and plot items from a selected post type.
- * Requires at least: 6.0
+ * Requires at least: 6.3
  * Requires PHP:      7.4
- * Version:           0.2.1
+ * Version:           0.2.2
  * Author:            Inblock
+ * Author URI:        https://www.inblock.net/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       inblock-map-block
+ * Domain Path:       /languages
  *
  * @fs_ignore /vendor/
  */
@@ -17,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'INBLOCK_MAP_BLOCK_VERSION', '0.2.1' );
+define( 'INBLOCK_MAP_BLOCK_VERSION', '0.2.2' );
 define( 'INBLOCK_MAP_BLOCK_FILE', __FILE__ );
 
 $inblock_map_block_autoload = __DIR__ . '/vendor/autoload.php';
@@ -96,6 +98,7 @@ function inblock_map_block_register_block() {
 		$asset['version'],
 		true
 	);
+	wp_set_script_translations( 'inblock-map-block-editor', 'inblock-map-block' );
 
 	wp_register_script(
 		'inblock-map-block-popup-builder',
@@ -104,7 +107,8 @@ function inblock_map_block_register_block() {
 		filemtime( plugin_dir_path( __FILE__ ) . 'build/popup-builder.js' ),
 		true
 	);
-	add_action( 'enqueue_block_editor_assets', function () { wp_enqueue_script( 'inblock-map-block-popup-builder' ); } );
+	wp_set_script_translations( 'inblock-map-block-popup-builder', 'inblock-map-block' );
+	add_action( 'enqueue_block_editor_assets', 'inblock_map_block_enqueue_popup_builder' );
 
 	wp_register_style(
 		'inblock-map-block-style',
@@ -185,6 +189,35 @@ function inblock_map_block_register_block() {
 	}
 }
 add_action( 'init', 'inblock_map_block_register_block' );
+
+/**
+ * Enqueues the editor-only popup builder extension.
+ */
+function inblock_map_block_enqueue_popup_builder() {
+	wp_enqueue_script( 'inblock-map-block-popup-builder' );
+}
+
+/**
+ * Adds suggested privacy-policy text for map tile requests.
+ */
+function inblock_map_block_add_privacy_policy_content() {
+	if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+		return;
+	}
+
+	$content = '<p>' . esc_html__( 'Pages containing an Inblock Map Block request map tiles or styles from the provider selected by the site administrator. The provider receives normal web-request information, which may include the visitor’s IP address, browser user agent, and referring page.', 'inblock-map-block' ) . '</p>';
+	$content .= '<p>' . wp_kses_post(
+		sprintf(
+			/* translators: 1: OpenStreetMap privacy-policy URL, 2: OpenFreeMap privacy-policy URL. */
+			__( 'The default providers are OpenStreetMap (<a href="%1$s">privacy policy</a>) and OpenFreeMap (<a href="%2$s">privacy policy</a>). If a custom map provider is configured, its own privacy terms apply.', 'inblock-map-block' ),
+			esc_url( 'https://osmfoundation.org/wiki/Privacy_Policy' ),
+			esc_url( 'https://openfreemap.org/privacy/' )
+		)
+	) . '</p>';
+
+	wp_add_privacy_policy_content( 'Inblock Map Block', $content );
+}
+add_action( 'admin_init', 'inblock_map_block_add_privacy_policy_content' );
 
 /**
  * Reads marker coordinates from a content item.
@@ -525,26 +558,31 @@ function inblock_map_block_render( $attributes, $content = '', $block = null ) {
 
 	$markers_enabled  = ! empty( $attributes['markersEnabled'] );
 	$markers_mode_attr = isset( $attributes['markersMode'] ) ? (string) $attributes['markersMode'] : '';
-	$markers_posttype = isset( $attributes['markersPostType'] ) ? (string) $attributes['markersPostType'] : '';
+	$markers_posttype = isset( $attributes['markersPostType'] ) ? sanitize_key( $attributes['markersPostType'] ) : '';
 	$markers_mode     = in_array( $markers_mode_attr, array( 'single', 'collection' ), true )
 		? $markers_mode_attr
 		: ( ! empty( $markers_posttype ) ? 'collection' : 'single' );
-	$markers_source   = isset( $attributes['markersSource'] ) ? (string) $attributes['markersSource'] : 'acf_location';
-	$acf_field        = isset( $attributes['acfLocationField'] ) ? (string) $attributes['acfLocationField'] : 'location';
+	$markers_source   = isset( $attributes['markersSource'] ) ? sanitize_key( $attributes['markersSource'] ) : 'acf_location';
+	$allowed_marker_sources = array( 'acf_location', 'acf_text_latlng', 'acf_repeater', 'meta_latlng' );
+	if ( ! in_array( $markers_source, $allowed_marker_sources, true ) ) {
+		$markers_source = 'acf_location';
+	}
+	$acf_field        = isset( $attributes['acfLocationField'] ) ? sanitize_key( $attributes['acfLocationField'] ) : 'location';
 	$repeater_field   = isset( $attributes['acfRepeaterField'] ) ? sanitize_key( $attributes['acfRepeaterField'] ) : '';
 	$repeater_coordinates_field = isset( $attributes['acfRepeaterCoordinatesField'] ) ? sanitize_key( $attributes['acfRepeaterCoordinatesField'] ) : '';
 	$repeater_label_field = isset( $attributes['acfRepeaterLabelField'] ) ? sanitize_key( $attributes['acfRepeaterLabelField'] ) : '';
-	$lat_meta_key     = isset( $attributes['latMetaKey'] ) ? (string) $attributes['latMetaKey'] : 'inblock_lat';
-	$lng_meta_key     = isset( $attributes['lngMetaKey'] ) ? (string) $attributes['lngMetaKey'] : 'inblock_lng';
+	$lat_meta_key     = isset( $attributes['latMetaKey'] ) ? sanitize_key( $attributes['latMetaKey'] ) : 'inblock_lat';
+	$lng_meta_key     = isset( $attributes['lngMetaKey'] ) ? sanitize_key( $attributes['lngMetaKey'] ) : 'inblock_lng';
 	$markers_limit    = isset( $attributes['markersLimit'] ) ? (int) $attributes['markersLimit'] : 100;
 	$markers_popup    = isset( $attributes['markersPopup'] ) ? (bool) $attributes['markersPopup'] : true;
 	$marker_popup_show_title = ! isset( $attributes['markerPopupShowTitle'] ) || (bool) $attributes['markerPopupShowTitle'];
 	$marker_popup_show_link = ! isset( $attributes['markerPopupShowLink'] ) || (bool) $attributes['markerPopupShowLink'];
 	$marker_popup_link_style = isset( $attributes['markerPopupLinkStyle'] ) && 'button' === $attributes['markerPopupLinkStyle'] ? 'button' : 'link';
 	$markers_autofit  = isset( $attributes['markersAutoFit'] ) ? (bool) $attributes['markersAutoFit'] : true;
-	$marker_style     = isset( $attributes['markerStyle'] ) ? (string) $attributes['markerStyle'] : 'default';
+	$marker_style     = isset( $attributes['markerStyle'] ) ? sanitize_key( $attributes['markerStyle'] ) : 'default';
+	$marker_style     = in_array( $marker_style, array( 'default', 'circle', 'dot' ), true ) ? $marker_style : 'default';
 	$marker_details_link_label = isset( $attributes['markerDetailsLinkLabel'] )
-		? trim( (string) $attributes['markerDetailsLinkLabel'] )
+		? sanitize_text_field( $attributes['markerDetailsLinkLabel'] )
 		: '';
 	if ( '' === $marker_details_link_label ) {
 		$marker_details_link_label = __( 'Plus d’infos', 'inblock-map-block' );
@@ -552,21 +590,36 @@ function inblock_map_block_render( $attributes, $content = '', $block = null ) {
 	$marker_popup_fields = isset( $attributes['markerPopupFields'] ) && is_array( $attributes['markerPopupFields'] )
 		? array_slice( $attributes['markerPopupFields'], 0, 5 )
 		: array();
-	$marker_color     = isset( $attributes['markerColor'] ) ? (string) $attributes['markerColor'] : '#2563eb';
-	$base_map         = isset( $attributes['baseMap'] ) ? (string) $attributes['baseMap'] : 'osm';
-	$base_map_color_mode = isset( $attributes['baseMapColorMode'] ) ? (string) $attributes['baseMapColorMode'] : 'original';
+	$marker_color     = isset( $attributes['markerColor'] ) ? sanitize_hex_color( $attributes['markerColor'] ) : '#2563eb';
+	$marker_color     = $marker_color ?: '#2563eb';
+	$base_map         = isset( $attributes['baseMap'] ) ? sanitize_key( $attributes['baseMap'] ) : 'osm';
+	$allowed_base_maps = array( 'osm', 'openfreemap_liberty', 'openfreemap_positron', 'openfreemap_bright', 'openfreemap_dark', 'openfreemap_fiord', 'openfreemap_3d' );
+	$base_map         = in_array( $base_map, $allowed_base_maps, true ) ? $base_map : 'osm';
+	$base_map_color_mode = isset( $attributes['baseMapColorMode'] ) ? sanitize_key( $attributes['baseMapColorMode'] ) : 'original';
 	$base_map_colors = 'original' !== $base_map_color_mode && isset( $attributes['baseMapColors'] ) && is_array( $attributes['baseMapColors'] )
 		? $attributes['baseMapColors']
 		: array();
+	$base_map_colors = array_map( 'sanitize_hex_color', $base_map_colors );
+	$base_map_colors = array_filter( $base_map_colors );
 	$custom_base_map_enabled = ! empty( $attributes['customBaseMapEnabled'] );
 	$custom_base_map_type = isset( $attributes['customBaseMapType'] ) && 'maplibre' === $attributes['customBaseMapType'] ? 'maplibre' : 'xyz';
-	$custom_base_map_url = isset( $attributes['customBaseMapUrl'] ) ? (string) $attributes['customBaseMapUrl'] : '';
-	$custom_maplibre_style_url = isset( $attributes['customMapLibreStyleUrl'] ) ? (string) $attributes['customMapLibreStyleUrl'] : '';
-	$custom_base_map_attribution = isset( $attributes['customBaseMapAttribution'] ) ? (string) $attributes['customBaseMapAttribution'] : '';
+	$custom_base_map_url = isset( $attributes['customBaseMapUrl'] ) ? sanitize_text_field( $attributes['customBaseMapUrl'] ) : '';
+	$custom_maplibre_style_url = isset( $attributes['customMapLibreStyleUrl'] ) ? esc_url_raw( $attributes['customMapLibreStyleUrl'] ) : '';
+	$allowed_attribution_html = array(
+		'a' => array(
+			'href'   => true,
+			'title'  => true,
+			'target' => true,
+			'rel'    => true,
+		),
+	);
+	$custom_base_map_attribution = isset( $attributes['customBaseMapAttribution'] )
+		? wp_kses( $attributes['customBaseMapAttribution'], $allowed_attribution_html )
+		: '';
 	$markers_cluster = isset( $attributes['markersCluster'] ) ? (bool) $attributes['markersCluster'] : true;
 	$markers_cluster_disable_at_zoom = isset( $attributes['markersClusterDisableAtZoom'] ) ? (int) $attributes['markersClusterDisableAtZoom'] : 18;
 	$custom_marker_enabled = ! empty( $attributes['customMarkerEnabled'] );
-	$custom_marker_url = isset( $attributes['customMarkerUrl'] ) ? (string) $attributes['customMarkerUrl'] : '';
+	$custom_marker_url = isset( $attributes['customMarkerUrl'] ) ? esc_url_raw( $attributes['customMarkerUrl'] ) : '';
 	$custom_marker_width = isset( $attributes['customMarkerWidth'] ) ? (int) $attributes['customMarkerWidth'] : 32;
 	$custom_marker_height = isset( $attributes['customMarkerHeight'] ) ? (int) $attributes['customMarkerHeight'] : 32;
 	$custom_marker_anchor_x = isset( $attributes['customMarkerAnchorX'] ) ? (int) $attributes['customMarkerAnchorX'] : 16;
@@ -639,14 +692,13 @@ function inblock_map_block_render( $attributes, $content = '', $block = null ) {
 		$custom_marker_anchor_y
 	);
 
-	$markers_json = wp_json_encode( $markers );
+	$markers_json = wp_json_encode( $markers, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
 	$markers_html = '';
 	if ( $markers_enabled ) {
 		if ( ! is_string( $markers_json ) ) {
 			$markers_json = '[]';
 		}
-		// Prevent accidental script termination inside JSON.
-		$markers_json = str_replace( '</script', '<\/script', $markers_json );
+		// wp_json_encode() with JSON_HEX_TAG prevents script-tag termination.
 		$markers_html = '<script type="application/json" class="inblock-map-block__markers">' . $markers_json . '</script>';
 	}
 

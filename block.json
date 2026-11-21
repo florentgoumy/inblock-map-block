@@ -5,7 +5,8 @@
 	"title": "Inblock Map Block",
 	"category": "widgets",
 	"icon": "location",
-	"description": "Display an OpenStreetMap map.",
+	"description": "Display an interactive map with WordPress and ACF content.",
+	"keywords": [ "map", "openstreetmap", "location" ],
 	"textdomain": "inblock-map-block",
 	"usesContext": [ "postId" ],
 	"supports": {
@@ -16,7 +17,7 @@
 			"style": true,
 			"width": true
 		},
-		"__experimentalShadow": true
+		"shadow": true
 	},
 	"attributes": {
 		"lat": {

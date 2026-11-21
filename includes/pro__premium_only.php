@@ -29,6 +29,7 @@ function inblock_map_block_pro_register_assets__premium_only() {
 		isset( $editor_asset['version'] ) ? $editor_asset['version'] : INBLOCK_MAP_BLOCK_VERSION,
 		true
 	);
+	wp_set_script_translations( 'inblock-map-block-pro-editor', 'inblock-map-block' );
 
 	$view_asset_file = plugin_dir_path( INBLOCK_MAP_BLOCK_FILE ) . 'build/pro-view__premium_only.asset.php';
 	$view_asset = file_exists( $view_asset_file )
