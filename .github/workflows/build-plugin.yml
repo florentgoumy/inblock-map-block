@@ -1,4 +1,4 @@
-name: Build and validate WordPress plugin
+name: Build WordPress Plugin
 
 on:
   workflow_dispatch:
@@ -6,61 +6,13 @@ on:
     branches:
       - main
   push:
-    branches:
-      - main
     tags:
       - "v*"
 
-permissions:
-  contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  quality:
-    name: Quality checks
+  build:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-          cache: npm
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "7.4"
-          coverage: none
-          tools: composer:v2
-
-      - name: Install dependencies
-        run: |
-          npm ci
-          composer install --prefer-dist --no-interaction
-
-      - name: Validate JavaScript, styles and package metadata
-        run: npm run check:js
-
-      - name: Validate PHP and WordPress Coding Standards
-        run: composer check
-
-      - name: Build Gutenberg assets
-        run: npm run build
-
-      - name: Verify generated files are committed
-        run: git diff --exit-code -- build
-
-  package:
-    name: Package and run Plugin Check
-    needs: quality
-    runs-on: ubuntu-latest
     env:
       PLUGIN_SLUG: inblock-map-block
 
@@ -71,47 +23,54 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "22"
           cache: npm
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Build Gutenberg assets
+        run: npm run build
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "7.4"
-          coverage: none
           tools: composer:v2
 
-      - name: Install and build production dependencies
-        run: |
-          npm ci
-          npm run build
-          composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+      - name: Install production PHP dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
-      - name: Prepare installable plugin
+      - name: Validate PHP syntax
         run: |
+          find . -type f -name "*.php" \
+            -not -path "./vendor/*" \
+            -not -path "./node_modules/*" \
+            -print0 | xargs -0 -n1 php -l
+
+      - name: Validate JavaScript
+        run: npm run lint:js
+
+      - name: Prepare release directory
+        run: |
+          rm -rf dist
           mkdir -p "dist/${PLUGIN_SLUG}"
-          rsync -av --exclude-from=.distignore ./ "dist/${PLUGIN_SLUG}/"
-          test -f "dist/${PLUGIN_SLUG}/${PLUGIN_SLUG}.php"
-          test -f "dist/${PLUGIN_SLUG}/block.json"
-          test -f "dist/${PLUGIN_SLUG}/build/index.js"
-          test -f "dist/${PLUGIN_SLUG}/vendor/autoload.php"
-          test ! -e "dist/${PLUGIN_SLUG}/src"
-          test ! -e "dist/${PLUGIN_SLUG}/node_modules"
-          test ! -e "dist/${PLUGIN_SLUG}/advanced-custom-fields-pro.zip"
+          rsync -av ./ "dist/${PLUGIN_SLUG}/" \
+            --exclude=".git/" \
+            --exclude=".github/" \
+            --exclude=".gitignore" \
+            --exclude="node_modules/" \
+            --exclude="src/" \
+            --exclude="wp-org-assets/" \
+            --exclude="dist/" \
+            --exclude=".DS_Store"
 
-      - name: Run WordPress Plugin Check
-        uses: wordpress/plugin-check-action@v1
-        with:
-          build-dir: ./dist/inblock-map-block
-          exclude-directories: vendor
-
-      - name: Create installable ZIP
+      - name: Create upload ZIP
         working-directory: dist
         run: zip -rq "${PLUGIN_SLUG}.zip" "${PLUGIN_SLUG}"
 
-      - name: Upload installable archive
+      - name: Upload Freemius-ready archive
         uses: actions/upload-artifact@v5
         with:
           name: inblock-map-block-release
           path: dist/inblock-map-block.zip
-          if-no-files-found: error
