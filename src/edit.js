@@ -746,29 +746,32 @@ export default function Edit( { attributes, setAttributes, context } ) {
 						label={ __( 'Base map', 'inblock-map-block' ) }
 						value={ baseMap }
 						options={ [
-							{ label: 'OpenStreetMap', value: 'osm' },
 							{
-								label: 'OpenFreeMap — Liberty',
+								label: __( 'OpenStreetMap', 'inblock-map-block' ),
+								value: 'osm',
+							},
+							{
+								label: __( 'OpenFreeMap — Liberty', 'inblock-map-block' ),
 								value: 'openfreemap_liberty',
 							},
 							{
-								label: 'OpenFreeMap — Positron',
+								label: __( 'OpenFreeMap — Positron', 'inblock-map-block' ),
 								value: 'openfreemap_positron',
 							},
 							{
-								label: 'OpenFreeMap — Bright',
+								label: __( 'OpenFreeMap — Bright', 'inblock-map-block' ),
 								value: 'openfreemap_bright',
 							},
 							{
-								label: 'OpenFreeMap — Dark',
+								label: __( 'OpenFreeMap — Dark', 'inblock-map-block' ),
 								value: 'openfreemap_dark',
 							},
 							{
-								label: 'OpenFreeMap — Fiord',
+								label: __( 'OpenFreeMap — Fiord', 'inblock-map-block' ),
 								value: 'openfreemap_fiord',
 							},
 							{
-								label: 'OpenFreeMap — 3D (experimental)',
+								label: __( 'OpenFreeMap — 3D (experimental)', 'inblock-map-block' ),
 								value: 'openfreemap_3d',
 							},
 						] }
@@ -1047,7 +1050,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 
 					<p>
 						{ __(
-							'Déplacez la carte et zoomez pour définir la vue par défaut.',
+							'Move and zoom the map to define the default view.',
 							'inblock-map-block'
 						) }
 					</p>
@@ -1175,7 +1178,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 									) }
 									value={ markersPostType }
 									options={ [
-										{ label: '—', value: '' },
+										{ label: __( 'None', 'inblock-map-block' ), value: '' },
 										...postTypeOptions,
 									] }
 									onChange={ ( value ) =>
@@ -1214,11 +1217,11 @@ export default function Edit( { attributes, setAttributes, context } ) {
 								value={ markersSource }
 								options={ [
 									{
-										label: 'ACF Location field',
+									label: __( 'ACF Location field', 'inblock-map-block' ),
 										value: 'acf_location',
 									},
 									{
-										label: 'ACF text {lat,lng}',
+									label: __( 'ACF text {lat,lng}', 'inblock-map-block' ),
 										value: 'acf_text_latlng',
 									},
 									{
@@ -1229,7 +1232,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 										value: 'acf_repeater',
 									},
 									{
-										label: 'Post meta (lat/lng)',
+									label: __( 'Post meta (lat/lng)', 'inblock-map-block' ),
 										value: 'meta_latlng',
 									},
 								] }
@@ -1245,7 +1248,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 										'ACF field name',
 										'inblock-map-block'
 									) }
-									helperText={ 'Example: location' }
+									helperText={ __( 'Example: location', 'inblock-map-block' ) }
 									value={ acfLocationField }
 									onChange={ ( value ) =>
 										setAttributes( {
@@ -1264,7 +1267,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 										) }
 										value={ acfRepeaterField }
 										options={ [
-											{ label: '—', value: '' },
+											{ label: __( 'None', 'inblock-map-block' ), value: '' },
 											...acfRepeaterOptions.map(
 												( field ) => ( {
 													label: `${ field.label } (${ field.name })`,
@@ -1287,7 +1290,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 										) }
 										value={ acfRepeaterCoordinatesField }
 										options={ [
-											{ label: '—', value: '' },
+											{ label: __( 'None', 'inblock-map-block' ), value: '' },
 											...repeaterSubFields.map(
 												( field ) => ( {
 													label: `${ field.label } (${ field.name })`,
@@ -1442,9 +1445,9 @@ export default function Edit( { attributes, setAttributes, context } ) {
 								) }
 								value={ markerStyle }
 								options={ [
-									{ label: 'Default', value: 'default' },
-									{ label: 'Circle', value: 'circle' },
-									{ label: 'Dot', value: 'dot' },
+									{ label: __( 'Default', 'inblock-map-block' ), value: 'default' },
+									{ label: __( 'Circle', 'inblock-map-block' ), value: 'circle' },
+									{ label: __( 'Dot', 'inblock-map-block' ), value: 'dot' },
 								] }
 								onChange={ ( value ) =>
 									setAttributes( { markerStyle: value } )

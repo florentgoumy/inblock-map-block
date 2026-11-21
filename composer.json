@@ -7,6 +7,20 @@
     "php": ">=7.4",
     "freemius/wordpress-sdk": "2.13.5"
   },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "phpcompatibility/phpcompatibility-wp": "^2.1",
+    "wp-coding-standards/wpcs": "^3.2"
+  },
+  "scripts": {
+    "lint": "phpcs",
+    "lint:fix": "phpcbf",
+    "check": [
+      "@validate",
+      "@lint"
+    ],
+    "validate": "composer validate --strict"
+  },
   "config": {
     "optimize-autoloader": true,
     "sort-packages": true

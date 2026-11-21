@@ -141,8 +141,14 @@ const withPremiumControls = createHigherOrderComponent(
 							label={ __( 'Order', 'inblock-map-block' ) }
 							value={ attributes.proOrder || 'DESC' }
 							options={ [
-								{ label: 'Descending', value: 'DESC' },
-								{ label: 'Ascending', value: 'ASC' },
+								{
+									label: __( 'Descending', 'inblock-map-block' ),
+									value: 'DESC',
+								},
+								{
+									label: __( 'Ascending', 'inblock-map-block' ),
+									value: 'ASC',
+								},
 							] }
 							onChange={ ( value ) =>
 								setAttributes( { proOrder: value } )
