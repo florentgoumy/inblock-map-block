@@ -16,10 +16,10 @@
     "lint": "phpcs",
     "lint:fix": "phpcbf",
     "check": [
-      "@validate",
+      "@validate-project",
       "@lint"
     ],
-    "validate": "composer validate --strict"
+    "validate-project": "composer validate --strict --no-check-publish"
   },
   "config": {
     "allow-plugins": {
