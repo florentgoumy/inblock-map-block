@@ -5,8 +5,8 @@
 .DS_Store
 AGENTS.md
 README.md
-composer.json
 composer.lock
+languages/.gitkeep
 node_modules/
 package.json
 package-lock.json

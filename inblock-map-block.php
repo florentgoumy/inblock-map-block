@@ -29,16 +29,16 @@ if ( file_exists( $inblock_map_block_autoload ) ) {
 }
 
 // Let the paid build take ownership when it is activated alongside the free build.
-if ( function_exists( 'imb_fs' ) ) {
-	imb_fs()->set_basename( true, __FILE__ );
+if ( function_exists( 'inblock_map_block_fs' ) ) {
+	inblock_map_block_fs()->set_basename( true, __FILE__ );
 }
 
-if ( function_exists( 'fs_dynamic_init' ) && ! function_exists( 'imb_fs' ) ) {
+if ( function_exists( 'fs_dynamic_init' ) && ! function_exists( 'inblock_map_block_fs' ) ) {
 	/** Returns the Freemius SDK instance. */
-	function imb_fs() {
-		global $imb_fs;
-		if ( ! isset( $imb_fs ) ) {
-			$imb_fs = fs_dynamic_init(
+	function inblock_map_block_fs() {
+		global $inblock_map_block_fs;
+		if ( ! isset( $inblock_map_block_fs ) ) {
+			$inblock_map_block_fs = fs_dynamic_init(
 				array(
 					'id'                  => '40192',
 					'slug'                => 'inblock-map-block',
@@ -58,16 +58,16 @@ if ( function_exists( 'fs_dynamic_init' ) && ! function_exists( 'imb_fs' ) ) {
 				)
 			);
 		}
-		return $imb_fs;
+		return $inblock_map_block_fs;
 	}
 
-	imb_fs();
-	do_action( 'imb_fs_loaded' );
+	inblock_map_block_fs();
+	do_action( 'inblock_map_block_fs_loaded' );
 }
 
 require_once __DIR__ . '/includes/rest.php';
 
-if ( function_exists( 'imb_fs' ) && imb_fs()->can_use_premium_code__premium_only() ) {
+if ( function_exists( 'inblock_map_block_fs' ) && inblock_map_block_fs()->can_use_premium_code__premium_only() ) {
 	require_once __DIR__ . '/includes/pro__premium_only.php';
 }
 

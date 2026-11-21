@@ -90,7 +90,7 @@ subject to an explicit administrator opt-in.
 ## Third-party software
 
 Bundled JavaScript libraries and their licenses are listed in
-`THIRD-PARTY-NOTICES.md`. All production assets are served locally; only map data
+`third-party-notices.txt`. All production assets are served locally; only map data
 and styles are requested from the configured map provider.
 
 Never commit the Freemius product secret key. Development-only constants belong
