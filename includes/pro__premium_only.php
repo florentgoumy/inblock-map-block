@@ -3,6 +3,8 @@
  * Premium features for Inblock Map Block.
  *
  * This file is removed automatically from the Free package by Freemius.
+ *
+ * @package InblockMapBlock
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function inblock_map_block_pro_register_assets__premium_only() {
 	$editor_asset_file = plugin_dir_path( INBLOCK_MAP_BLOCK_FILE ) . 'build/pro-edit__premium_only.asset.php';
-	$editor_asset = file_exists( $editor_asset_file )
+	$editor_asset      = file_exists( $editor_asset_file )
 		? require $editor_asset_file
 		: array(
 			'dependencies' => array(),
@@ -29,9 +31,10 @@ function inblock_map_block_pro_register_assets__premium_only() {
 		isset( $editor_asset['version'] ) ? $editor_asset['version'] : INBLOCK_MAP_BLOCK_VERSION,
 		true
 	);
+	wp_set_script_translations( 'inblock-map-block-pro-editor', 'inblock-map-block' );
 
 	$view_asset_file = plugin_dir_path( INBLOCK_MAP_BLOCK_FILE ) . 'build/pro-view__premium_only.asset.php';
-	$view_asset = file_exists( $view_asset_file )
+	$view_asset      = file_exists( $view_asset_file )
 		? require $view_asset_file
 		: array(
 			'dependencies' => array(),
@@ -85,39 +88,39 @@ function inblock_map_block_pro_register_attributes__premium_only( $args, $block_
 	}
 
 	$premium_attributes = array(
-		'proTaxonomy' => array(
+		'proTaxonomy'            => array(
 			'type'    => 'string',
 			'default' => '',
 		),
-		'proTerm' => array(
+		'proTerm'                => array(
 			'type'    => 'string',
 			'default' => '',
 		),
-		'proMetaKey' => array(
+		'proMetaKey'             => array(
 			'type'    => 'string',
 			'default' => '',
 		),
-		'proMetaValue' => array(
+		'proMetaValue'           => array(
 			'type'    => 'string',
 			'default' => '',
 		),
-		'proOrderBy' => array(
+		'proOrderBy'             => array(
 			'type'    => 'string',
 			'default' => 'date',
 		),
-		'proOrder' => array(
+		'proOrder'               => array(
 			'type'    => 'string',
 			'default' => 'DESC',
 		),
-		'proPopupImage' => array(
+		'proPopupImage'          => array(
 			'type'    => 'boolean',
 			'default' => false,
 		),
-		'proPopupExcerpt' => array(
+		'proPopupExcerpt'        => array(
 			'type'    => 'boolean',
 			'default' => false,
 		),
-		'proPopupMetaKeys' => array(
+		'proPopupMetaKeys'       => array(
 			'type'    => 'string',
 			'default' => '',
 		),
@@ -125,7 +128,7 @@ function inblock_map_block_pro_register_attributes__premium_only( $args, $block_
 			'type'    => 'string',
 			'default' => '',
 		),
-		'proMarkerColorRules' => array(
+		'proMarkerColorRules'    => array(
 			'type'    => 'string',
 			'default' => '',
 		),
@@ -153,6 +156,7 @@ function inblock_map_block_pro_query_args__premium_only( $query_args, $attribute
 	$term     = isset( $attributes['proTerm'] ) ? sanitize_title( $attributes['proTerm'] ) : '';
 
 	if ( $taxonomy && $term && taxonomy_exists( $taxonomy ) ) {
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- User-configured taxonomy filtering is the purpose of this premium feature.
 		$query_args['tax_query'] = array(
 			array(
 				'taxonomy' => $taxonomy,
@@ -166,9 +170,11 @@ function inblock_map_block_pro_query_args__premium_only( $query_args, $attribute
 	$meta_value = isset( $attributes['proMetaValue'] ) ? sanitize_text_field( $attributes['proMetaValue'] ) : '';
 
 	if ( $meta_key ) {
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- User-configured metadata filtering requires this query argument.
 		$query_args['meta_key'] = $meta_key;
 
 		if ( '' !== $meta_value ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The optional value constraint is explicitly configured by the editor.
 			$query_args['meta_query'] = array(
 				array(
 					'key'     => $meta_key,
@@ -180,8 +186,8 @@ function inblock_map_block_pro_query_args__premium_only( $query_args, $attribute
 	}
 
 	$allowed_orderby = array( 'date', 'title', 'menu_order', 'modified', 'rand' );
-	$orderby = isset( $attributes['proOrderBy'] ) ? sanitize_key( $attributes['proOrderBy'] ) : 'date';
-	$order   = isset( $attributes['proOrder'] ) ? strtoupper( sanitize_text_field( $attributes['proOrder'] ) ) : 'DESC';
+	$orderby         = isset( $attributes['proOrderBy'] ) ? sanitize_key( $attributes['proOrderBy'] ) : 'date';
+	$order           = isset( $attributes['proOrder'] ) ? strtoupper( sanitize_text_field( $attributes['proOrder'] ) ) : 'DESC';
 
 	if ( in_array( $orderby, $allowed_orderby, true ) ) {
 		$query_args['orderby'] = $orderby;

@@ -1,0 +1,14 @@
+THIRD-PARTY NOTICES
+===================
+
+Inblock Map Block bundles the following open-source software in its compiled assets:
+
+* Leaflet 1.9.4 — BSD-2-Clause — https://github.com/Leaflet/Leaflet
+* Leaflet.markercluster 1.5.3 — MIT — https://github.com/Leaflet/Leaflet.markercluster
+* MapLibre GL JS 5.15.0 — BSD-3-Clause — https://github.com/maplibre/maplibre-gl-js
+* MapLibre GL Leaflet 0.1.4 — MIT — https://github.com/maplibre/maplibre-gl-leaflet
+* Freemius WordPress SDK 2.13.5 — GPL-2.0-or-later — https://github.com/Freemius/wordpress-sdk
+
+The corresponding copyright and license notices are preserved in the installed
+dependency packages and upstream repositories. This file is informational and does
+not replace the terms of those licenses.
