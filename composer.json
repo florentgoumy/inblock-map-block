@@ -22,6 +22,9 @@
     "validate": "composer validate --strict"
   },
   "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    },
     "optimize-autoloader": true,
     "sort-packages": true
   }
