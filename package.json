@@ -32,8 +32,8 @@
 		"typescript": "5.9.3"
 	},
 	"scripts": {
-		"build": "wp-scripts build src/index.js src/view.js src/pro-edit__premium_only.js src/pro-view__premium_only.js",
-		"start": "wp-scripts start src/index.js src/view.js src/pro-edit__premium_only.js src/pro-view__premium_only.js",
+		"build": "wp-scripts build src/index.js src/view.js src/popup-builder.js src/pro-edit__premium_only.js src/pro-view__premium_only.js && node scripts/finalize-build.js",
+		"start": "wp-scripts start src/index.js src/view.js src/popup-builder.js src/pro-edit__premium_only.js src/pro-view__premium_only.js",
 		"wordpress": "wp-playground-cli start",
 		"dev": "concurrently --kill-others --names assets,wordpress --prefix-colors blue,green \"npm run start\" \"npm run wordpress\"",
 		"lint:js": "wp-scripts lint-js src",

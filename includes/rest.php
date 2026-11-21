@@ -59,7 +59,8 @@ function inblock_map_block_rest_get_acf_repeater_fields( $request ) {
 	);
 
 	foreach ( $groups as $group ) {
-		foreach ( acf_get_fields( $group ) ?: array() as $field ) {
+		$group_fields = acf_get_fields( $group );
+		foreach ( $group_fields ? $group_fields : array() as $field ) {
 			if ( 'repeater' !== ( $field['type'] ?? '' ) || empty( $field['name'] ) ) {
 				continue;
 			}
@@ -110,7 +111,8 @@ function inblock_map_block_rest_get_acf_popup_fields( $request ) {
 	$fields  = array();
 
 	foreach ( $groups as $group ) {
-		foreach ( acf_get_fields( $group ) ?: array() as $field ) {
+		$group_fields = acf_get_fields( $group );
+		foreach ( $group_fields ? $group_fields : array() as $field ) {
 			if ( ! inblock_map_block_is_supported_popup_field( $field ) ) {
 				continue;
 			}
@@ -132,7 +134,7 @@ function inblock_map_block_rest_get_acf_popup_fields( $request ) {
  * @return WP_REST_Response
  */
 function inblock_map_block_rest_get_post_types() {
-	$types = get_post_types(
+	$types  = get_post_types(
 		array(
 			'show_ui'            => true,
 			'public'             => true,
@@ -237,7 +239,7 @@ function inblock_map_block_rest_get_markers( $request ) {
  */
 function inblock_map_block_register_rest_routes() {
 	$context_arguments = array(
-		'post_id' => array(
+		'post_id'   => array(
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 		),

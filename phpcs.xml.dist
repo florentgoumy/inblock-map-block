@@ -21,8 +21,14 @@
 	</rule>
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="inblock-map-block"/>
+			<property name="text_domain" type="array">
+				<element value="inblock-map-block"/>
+			</property>
 		</properties>
+	</rule>
+	<!-- Freemius requires the __premium_only suffix to strip paid code from free builds. -->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>includes/pro__premium_only.php</exclude-pattern>
 	</rule>
 	<rule ref="PHPCompatibilityWP"/>
 </ruleset>
