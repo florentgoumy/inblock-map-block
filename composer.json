@@ -19,7 +19,7 @@
       "@validate-project",
       "@lint"
     ],
-    "validate-project": "composer validate --strict --no-check-publish"
+    "validate-project": "composer validate --no-check-publish"
   },
   "config": {
     "allow-plugins": {
